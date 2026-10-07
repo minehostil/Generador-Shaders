@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Text Effects Generator - Minecraft Preview</title>
-<!-- Fuente pixelada estilo Minecraft -->
 <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/minecraft-ia">
 <style>
 :root{--bg:#080b12;--panel:#10151f;--panel2:#151c28;--border:#273244;--text:#f4f7fb;--muted:#8995a8;--accent:#27f580}
@@ -35,7 +34,6 @@ button.secondary{background:#202a39;color:#e9eef6}
 button:hover{filter:brightness(1.08)}
 .actions{display:flex;gap:9px;flex-wrap:wrap}
 
-/* Previsualización estilo Minecraft */
 .preview{min-height:430px;display:flex;flex-direction:column}
 .preview-stage{
   flex:1;min-height:330px;border-radius:14px;
@@ -45,7 +43,6 @@ button:hover{filter:brightness(1.08)}
   padding:20px;
 }
 
-/* Tooltip Minecraft GUI */
 .mc-tooltip {
   background: rgba(16, 0, 16, 0.94);
   border: 3px solid #28005b;
@@ -57,7 +54,6 @@ button:hover{filter:brightness(1.08)}
   color: #fff;
   line-height: 1.6;
   max-width: 100%;
-  image-rendering: pixelated;
   user-select: none;
 }
 
@@ -67,47 +63,55 @@ button:hover{filter:brightness(1.08)}
 .mc-chat-line { font-size: 16px; margin-bottom: 10px; text-shadow: 2px 2px 0px #1b1b1b; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .mc-footer { font-size: 14px; color: #ffaa00; text-shadow: 2px 2px 0px #3f2a00; }
 
-/* Tag estilizado para [NIVEL] o Nombres */
 .mc-tag-level { color: #55ff55; text-shadow: 2px 2px 0 #153f15; }
 .mc-tag-team { color: #ff55ff; text-shadow: 2px 2px 0 #3f153f; }
 .mc-tag-rank { background: #555555; color: #ffffff; padding: 0 4px; border-radius: 2px; font-size: 12px; height: 20px; display: inline-flex; align-items: center; text-shadow: 1px 1px 0 #000; }
 .mc-tag-user { color: #55ffff; text-shadow: 2px 2px 0 #153f3f; }
 .mc-arrow { color: #ff55ff; text-shadow: 2px 2px 0 #3f153f; margin: 0 4px; }
 
-.preview-text{
+/* Contenedor del texto recortado letra por letra */
+.preview-text {
   font-size: 16px;
   font-family: 'Minecraft', 'MinecraftIA', monospace, sans-serif;
-  position:relative;
-  white-space:nowrap;
+  display: inline-flex;
+  white-space: pre;
+}
+
+/* Estilo individual para cada caracter */
+.mc-char {
   display: inline-block;
+  position: relative;
   text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
 }
+
 .preview-label{position:absolute;left:15px;top:12px;font-size:11px;color:#aab5c7;font-family:monospace;background:rgba(0,0,0,0.5);padding:2px 6px;border-radius:4px}
 
 .code{margin-top:18px}
 .code pre{margin:0;background:#080c12;border:1px solid var(--border);border-radius:12px;padding:15px;overflow:auto;color:#c9f8da;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}
 .code-actions{display:flex;justify-content:flex-end;margin-top:8px}
 
-/* Animaciones */
-@keyframes shake{0%,100%{transform:translate(0)}25%{transform:translate(-2px,1px)}50%{transform:translate(2px,-1px)}75%{transform:translate(-1px,-2px)}}
-@keyframes wavy{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-@keyframes bounce{0%,100%{transform:translateY(0)}45%{transform:translateY(-12px)}65%{transform:translateY(-3px)}}
+/* Animaciones per-char */
+@keyframes shake{0%,100%{transform:translate(0)}25%{transform:translate(-1px,1px)}50%{transform:translate(1px,-1px)}75%{transform:translate(-1px,-1px)}}
+@keyframes wavy{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}45%{transform:translateY(-8px)}65%{transform:translateY(-2px)}}
 @keyframes blink{0%,45%{opacity:1}50%,100%{opacity:.12}}
-@keyframes pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.1);opacity:1}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.2);opacity:1}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes seqspin{0%{transform:rotate(0)}45%{transform:rotate(360deg)}100%{transform:rotate(360deg)}}
 @keyframes fade{0%,100%{opacity:.2}50%{opacity:1}}
-@keyframes jump{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes jump{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @keyframes glitch{0%,100%{text-shadow:2px 0 #f00,-2px 0 #0ff}20%{transform:translate(-2px)}40%{transform:translate(2px)}60%{text-shadow:-2px 0 #f00,2px 0 #0ff}}
-@keyframes lava{0%,100%{filter:brightness(1)}50%{filter:brightness(1.45) saturate(1.4)}}
-@keyframes rainbow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
-@keyframes gradientMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-@keyframes gradientSweep{0%{background-position:0% 50%}100%{background-position:200% 50%}}
-@keyframes offsetPreview{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
-@keyframes scalePreview{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+@keyframes lava{0%,100%{filter:brightness(1)}50%{filter:brightness(1.5) saturate(1.5)}}
+@keyframes rainbow{
+  0% { color: #ff0000; }
+  17% { color: #ff8800; }
+  33% { color: #ffff00; }
+  50% { color: #00ff00; }
+  67% { color: #00ffff; }
+  83% { color: #0088ff; }
+  100% { color: #ff00ff; }
+}
 
-.gradient-animated{background-size:200% 100%;animation:gradientMove 2.5s ease-in-out infinite}
-.dynamic-gradient-animated{background-size:300% 100%;animation:gradientSweep 2s linear infinite}
 .effect-shake{animation:shake .25s infinite}
 .effect-wavy{animation:wavy 1s ease-in-out infinite}
 .effect-bouncy{animation:bounce .9s ease-in-out infinite}
@@ -120,9 +124,7 @@ button:hover{filter:brightness(1.08)}
 .effect-glitch{animation:glitch .35s infinite}
 .effect-lava{animation:lava .8s ease-in-out infinite}
 .effect-rainbow{animation:rainbow 2s linear infinite}
-.effect-wavy.effect-rainbow{animation:wavy 1s ease-in-out infinite,rainbow 2s linear infinite}
-.effect-bouncy.effect-rainbow{animation:bounce .9s ease-in-out infinite,rainbow 2s linear infinite}
-.gradient{background-clip:text;-webkit-background-clip:text;color:transparent}
+
 small{color:var(--muted)}
 @media(max-width:850px){.layout{grid-template-columns:1fr}.preview{min-height:400px}}
 </style>
@@ -147,9 +149,9 @@ small{color:var(--muted)}
 <label>Efecto</label>
 <select id="effect">
 <optgroup label="Efectos básicos">
+<option value="rainbow" selected>Rainbow</option>
 <option value="shake">Shake</option>
 <option value="wavy">Wavy</option>
-<option value="rainbow">Rainbow</option>
 <option value="bouncy">Bouncy</option>
 <option value="blinking">Blinking</option>
 <option value="pulse">Pulse</option>
@@ -204,12 +206,12 @@ small{color:var(--muted)}
 <div class="field" id="gradientFields" style="display:none">
 <label>Colores del gradiente</label>
 <div class="color-row">
-<input id="grad1" type="color" value="#00C800">
-<input id="grad2" type="color" value="#FFFF00">
+<input id="grad1" type="color" value="#FF0000">
+<input id="grad2" type="color" value="#00FF00">
 </div>
 <div class="rgb" style="grid-template-columns:1fr 1fr">
-<input id="gradHex1" value="#00C800" maxlength="7">
-<input id="gradHex2" value="#FFFF00" maxlength="7">
+<input id="gradHex1" value="#FF0000" maxlength="7">
+<input id="gradHex2" value="#00FF00" maxlength="7">
 </div>
 </div>
 
@@ -246,7 +248,6 @@ small{color:var(--muted)}
 <div class="preview-stage">
 <span class="preview-label">MINECRAFT TOOLTIP PREVIEW</span>
 
-<!-- Minecraft Tooltip Container -->
 <div class="mc-tooltip">
   <div class="mc-title">Opción 10</div>
   <div class="mc-subtitle">INFORMACION</div>
@@ -259,7 +260,7 @@ small{color:var(--muted)}
     <span class="mc-tag-rank">EXPLORADOR</span>
     <span class="mc-tag-user">MVK_0</span>
     <span class="mc-arrow">&raquo;</span>
-    <div id="preview" class="preview-text">Hola MineHostil</div>
+    <div id="preview" class="preview-text"></div>
   </div>
 
   <div class="mc-footer">&rarr; Clic para seleccionar!</div>
@@ -277,24 +278,33 @@ small{color:var(--muted)}
 <script>
 const $=id=>document.getElementById(id);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+
 function rgbFromHex(hex){
  hex=hex.trim().replace("#","");
  if(!/^[0-9a-fA-F]{6}$/.test(hex)) return null;
  return [parseInt(hex.slice(0,2),16),parseInt(hex.slice(2,4),16),parseInt(hex.slice(4,6),16)];
 }
+
 function hexFromRgb(r,g,b){return "#"+[r,g,b].map(x=>clamp(Number(x)||0,0,255).toString(16).padStart(2,"0")).join("").toUpperCase()}
+
 function setMainHex(hex){
  const rgb=rgbFromHex(hex); if(!rgb)return;
  $("hex").value=hex.toUpperCase();
  ["r","g","b"].forEach((id,i)=>$(id).value=rgb[i]);$("color").value=hex;
 }
+
 function setVisualHex(hex){
  const rgb=rgbFromHex(hex); if(!rgb)return;
  $("effectHex").value=hex.toUpperCase(); $("effectColor").value=hex;
 }
-function cssGradient(){
- return `linear-gradient(90deg, ${$("grad1").value}, ${$("grad2").value})`;
+
+function interpolateColor(c1, c2, factor) {
+  const r = Math.round(c1[0] + factor * (c2[0] - c1[0]));
+  const g = Math.round(c1[1] + factor * (c2[1] - c1[1]));
+  const b = Math.round(c1[2] + factor * (c2[2] - c1[2]));
+  return `rgb(${r},${g},${b})`;
 }
+
 function update(){
  const effect=$("effect").value;
  const visual=$("effectColor").value;
@@ -303,61 +313,54 @@ function update(){
  $("paramValue").textContent=p.toFixed(1);
  $("durationValue").textContent=duration.toFixed(1)+"s";
 
- const preview=$("preview");
- preview.className="preview-text";
- preview.style.cssText="";
- preview.textContent=$("sampleText").value || "Hola MineHostil";
+ const text = $("sampleText").value || "Hola MineHostil";
+ const preview = $("preview");
+ preview.innerHTML = "";
 
- if(effect==="gradient" || effect==="dynamic_gradient"){
-   preview.classList.add("gradient");
-   preview.style.backgroundImage=cssGradient();
-   preview.style.color="transparent";
-   preview.style.webkitBackgroundClip="text";
-   preview.style.backgroundClip="text";
-   preview.style.backgroundSize=effect==="gradient"?"100% 100%":"300% 100%";
-   preview.style.animation =
-      effect==="gradient"
-        ? `gradientMove ${Math.max(0.8, 4/p)}s ease-in-out infinite`
-        : `gradientSweep ${Math.max(0.7, 3/p)}s linear infinite`;
- } else if(effect==="rainbow"){
-   preview.style.color=visual;
-   preview.classList.add("effect-rainbow");
-   preview.style.animationDuration=Math.max(0.7,3/p)+"s";
- } else if(effect==="wavy_rainbow"){
-   preview.classList.add("effect-wavy","effect-rainbow");
-   preview.style.color=visual;
-   preview.style.animationDuration=Math.max(0.5,1.5/p)+"s, "+Math.max(0.7,3/p)+"s";
- } else if(effect==="bouncy_rainbow"){
-   preview.classList.add("effect-bouncy","effect-rainbow");
-   preview.style.color=visual;
-   preview.style.animationDuration=Math.max(0.5,1.8/p)+"s, "+Math.max(0.7,3/p)+"s";
- } else if(effect==="scale"){
-   preview.style.color=visual;
-   preview.style.animation=`scalePreview ${Math.max(0.7,2/p)}s ease-in-out infinite`;
- } else if(effect==="offset"){
-   preview.style.color=visual;
-   preview.style.animation=`offsetPreview ${Math.max(0.7,2/p)}s ease-in-out infinite`;
- } else {
-   preview.classList.add("effect-"+effect);
-   preview.style.color=visual;
+ const dur = Math.max(0.5, 3/p);
+ const isGrad = effect === "gradient" || effect === "dynamic_gradient";
+ const c1 = rgbFromHex($("grad1").value) || [255,0,0];
+ const c2 = rgbFromHex($("grad2").value) || [0,255,0];
 
-   const speed={
-     shake:Math.max(0.12,0.5/p),
-     wavy:Math.max(0.35,1.3/p),
-     bouncy:Math.max(0.35,1.5/p),
-     blinking:Math.max(0.25,1.5/p),
-     pulse:Math.max(0.35,1.6/p),
-     spin:Math.max(0.5,3/p),
-     sequential_spin:Math.max(0.6,3.5/p),
-     fade:Math.max(0.4,1.8/p),
-     iterating:Math.max(0.35,1.5/p),
-     glitch:Math.max(0.08,0.45/p),
-     lava:Math.max(0.25,1.2/p)
-   }[effect] || duration;
+ // Construcción por caracter individual
+ text.split("").forEach((char, i) => {
+   const span = document.createElement("span");
+   span.className = "mc-char";
+   span.textContent = char === " " ? "\u00A0" : char;
 
-   preview.style.animationDuration=speed+"s";
- }
+   const delay = (i * 0.1).toFixed(2) + "s";
 
+   if (isGrad) {
+     const factor = text.length > 1 ? i / (text.length - 1) : 0;
+     span.style.color = interpolateColor(c1, c2, factor);
+     if (effect === "dynamic_gradient") {
+       span.classList.add("effect-pulse");
+       span.style.animationDuration = dur + "s";
+       span.style.animationDelay = delay;
+     }
+   } else if (effect === "rainbow") {
+     span.classList.add("effect-rainbow");
+     span.style.animationDuration = dur + "s";
+     span.style.animationDelay = delay;
+   } else if (effect === "wavy_rainbow") {
+     span.classList.add("effect-wavy", "effect-rainbow");
+     span.style.animationDuration = Math.max(0.4, 1.2/p) + "s, " + dur + "s";
+     span.style.animationDelay = delay + ", " + delay;
+   } else if (effect === "bouncy_rainbow") {
+     span.classList.add("effect-bouncy", "effect-rainbow");
+     span.style.animationDuration = Math.max(0.4, 1.4/p) + "s, " + dur + "s";
+     span.style.animationDelay = delay + ", " + delay;
+   } else {
+     span.style.color = visual;
+     span.classList.add("effect-" + effect);
+     span.style.animationDuration = dur + "s";
+     span.style.animationDelay = delay;
+   }
+
+   preview.appendChild(span);
+ });
+
+ // Configuración del bloque C++
  const rgb=[$("r").value,$("g").value,$("b").value];
  const id=`${rgb[0]}, ${rgb[1]}, ${rgb[2]}`;
  let body="";
@@ -388,12 +391,14 @@ function update(){
              effect.replaceAll("_"," ");
  $("output").textContent=`// ${label} (${ $("hex").value.toUpperCase() })\n${macro}(${id}) {\n${body}\n}`;
 }
+
 function visualRgb(){return rgbFromHex($("effectColor").value).join(", ")}
 function gradRgb(n){return rgbFromHex($("grad"+n).value).join(", ")}
 function syncGradientHex(n){
  const h=$("gradHex"+n).value.trim(); const rgb=rgbFromHex(h); if(rgb)$("grad"+n).value=h;
  update();
 }
+
 $("color").addEventListener("input",e=>{setMainHex(e.target.value);update()});
 $("hex").addEventListener("input",e=>{const r=rgbFromHex(e.target.value);if(r){$("color").value=e.target.value;["r","g","b"].forEach((x,i)=>$(x).value=r[i]);update()}});
 ["r","g","b"].forEach((id,i)=>$(id).addEventListener("input",()=>{const h=hexFromRgb($("r").value,$("g").value,$("b").value);$("hex").value=h;$("color").value=h;update()}));
@@ -403,6 +408,7 @@ $("effectHex").addEventListener("input",e=>{const r=rgbFromHex(e.target.value);i
 ["gradHex1","gradHex2"].forEach((id,i)=>$(id).addEventListener("input",()=>syncGradientHex(i+1)));
 ["effect","param","duration","shadow","sampleText"].forEach(id=>$(id).addEventListener("input",update));
 $("random").onclick=()=>{const h=hexFromRgb(Math.random()*256,Math.random()*256,Math.random()*256);setMainHex(h);update()};
+
 function copy(){navigator.clipboard.writeText($("output").textContent);$("copy").textContent="¡Copiado!";$("copy2").textContent="¡Copiado!";setTimeout(()=>{$("copy").textContent="Copiar código";$("copy2").textContent="Copiar configuración"},1200)}
 $("copy").onclick=copy;$("copy2").onclick=copy;
 $("reset").onclick=()=>{location.reload()};
