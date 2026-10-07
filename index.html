@@ -58,6 +58,12 @@ display:flex;align-items:center;justify-content:center;overflow:hidden;position:
 @keyframes glitch{0%,100%{text-shadow:2px 0 #f00,-2px 0 #0ff}20%{transform:translate(-2px)}40%{transform:translate(2px)}60%{text-shadow:-3px 0 #f00,3px 0 #0ff}}
 @keyframes lava{0%,100%{filter:brightness(1)}50%{filter:brightness(1.45) saturate(1.4)}}
 @keyframes rainbow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
+@keyframes gradientMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes gradientSweep{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes offsetPreview{0%,100%{transform:translateY(0)}50%{transform:translateY(-40px)}}
+@keyframes scalePreview{0%,100%{transform:scale(1)}50%{transform:scale(1.5)}}
+.gradient-animated{background-size:200% 100%;animation:gradientMove 2.5s ease-in-out infinite}
+.dynamic-gradient-animated{background-size:300% 100%;animation:gradientSweep 2s linear infinite}
 .effect-shake{animation:shake .25s infinite}
 .effect-wavy{animation:wavy 1s ease-in-out infinite}
 .effect-bouncy{animation:bounce .9s ease-in-out infinite}
@@ -226,35 +232,68 @@ function update(){
  const effect=$("effect").value;
  const visual=$("effectColor").value;
  const p=Number($("param").value);
+ const duration=Math.max(0.2,Number($("duration").value));
  $("paramValue").textContent=p.toFixed(1);
- $("durationValue").textContent=Number($("duration").value).toFixed(1)+"s";
+ $("durationValue").textContent=duration.toFixed(1)+"s";
 
  const preview=$("preview");
  preview.className="preview-text";
- preview.style="";
+ preview.style.cssText="";
  preview.textContent="TU TEXTO";
 
- if(effect==="wavy_rainbow"||effect==="bouncy_rainbow"){
-   preview.classList.add(effect==="wavy_rainbow"?"effect-wavy":"effect-bouncy","effect-rainbow");
- }else if(effect==="gradient"||effect==="dynamic_gradient"){
+ // The preview intentionally uses the visual colors, not the identifier RGB.
+ // The identifier RGB is only used by the TEXT_EFFECT macro.
+ if(effect==="gradient" || effect==="dynamic_gradient"){
    preview.classList.add("gradient");
    preview.style.backgroundImage=cssGradient();
-   preview.style.backgroundSize=effect==="dynamic_gradient"?"200% 100%":"100% 100%";
-   if(effect==="dynamic_gradient"){
-      preview.animate([{backgroundPosition:"0% 50%"},{backgroundPosition:"100% 50%"},{backgroundPosition:"0% 50%"}],
-      {duration:Math.max(500,p*1000),iterations:Infinity});
-   }
- }else if(effect==="scale"){
-   preview.style.transform=`scale(1.5)`;
- }else if(effect==="offset"){
-   preview.style.transform="translateY(-40px)";
- }else{
+   preview.style.color="transparent";
+   preview.style.webkitBackgroundClip="text";
+   preview.style.backgroundClip="text";
+   preview.style.backgroundSize=effect==="gradient"?"100% 100%":"300% 100%";
+   preview.style.animation =
+      effect==="gradient"
+        ? `gradientMove ${Math.max(0.8, 4/p)}s ease-in-out infinite`
+        : `gradientSweep ${Math.max(0.7, 3/p)}s linear infinite`;
+ } else if(effect==="rainbow"){
+   preview.style.color=visual;
+   preview.classList.add("effect-rainbow");
+   preview.style.animationDuration=Math.max(0.7,3/p)+"s";
+ } else if(effect==="wavy_rainbow"){
+   preview.classList.add("effect-wavy","effect-rainbow");
+   preview.style.color=visual;
+   preview.style.animationDuration=Math.max(0.5,1.5/p)+"s, "+Math.max(0.7,3/p)+"s";
+ } else if(effect==="bouncy_rainbow"){
+   preview.classList.add("effect-bouncy","effect-rainbow");
+   preview.style.color=visual;
+   preview.style.animationDuration=Math.max(0.5,1.8/p)+"s, "+Math.max(0.7,3/p)+"s";
+ } else if(effect==="scale"){
+   preview.style.color=visual;
+   preview.style.animation=`scalePreview ${Math.max(0.7,2/p)}s ease-in-out infinite`;
+ } else if(effect==="offset"){
+   preview.style.color=visual;
+   preview.style.animation=`offsetPreview ${Math.max(0.7,2/p)}s ease-in-out infinite`;
+ } else {
    preview.classList.add("effect-"+effect);
- }
- preview.style.color=visual;
- preview.style.animationDuration=Number($("duration").value)+"s";
- if(effect==="rainbow"||effect==="wavy_rainbow"||effect==="bouncy_rainbow") preview.style.color=visual;
+   preview.style.color=visual;
 
+   const speed={
+     shake:Math.max(0.12,0.5/p),
+     wavy:Math.max(0.35,1.3/p),
+     bouncy:Math.max(0.35,1.5/p),
+     blinking:Math.max(0.25,1.5/p),
+     pulse:Math.max(0.35,1.6/p),
+     spin:Math.max(0.5,3/p),
+     sequential_spin:Math.max(0.6,3.5/p),
+     fade:Math.max(0.4,1.8/p),
+     iterating:Math.max(0.35,1.5/p),
+     glitch:Math.max(0.08,0.45/p),
+     lava:Math.max(0.25,1.2/p)
+   }[effect] || duration;
+
+   preview.style.animationDuration=speed+"s";
+ }
+
+ // Update the generated configuration.
  const rgb=[$("r").value,$("g").value,$("b").value];
  const id=`${rgb[0]}, ${rgb[1]}, ${rgb[2]}`;
  let body="";
@@ -280,7 +319,9 @@ function update(){
  else if(effect==="gradient") body=`    apply_gradient(rgb(${gradRgb(1)}), rgb(${gradRgb(2)}), ${p.toFixed(1)});`;
  else if(effect==="dynamic_gradient") body=`    apply_dynamic_gradient(rgb(${gradRgb(1)}), rgb(${gradRgb(2)}), ${p.toFixed(1)}, 500.0);`;
 
- const label=effect==="wavy_rainbow"?"Wavy + Rainbow":effect==="bouncy_rainbow"?"Bouncy + Rainbow":effect.replaceAll("_"," ");
+ const label=effect==="wavy_rainbow"?"Wavy + Rainbow":
+             effect==="bouncy_rainbow"?"Bouncy + Rainbow":
+             effect.replaceAll("_"," ");
  $("output").textContent=`// ${label} (${ $("hex").value.toUpperCase() })\n${macro}(${id}) {\n${body}\n}`;
 }
 function visualRgb(){return rgbFromHex($("effectColor").value).join(", ")}
@@ -302,9 +343,11 @@ function copy(){navigator.clipboard.writeText($("output").textContent);$("copy")
 $("copy").onclick=copy;$("copy2").onclick=copy;
 $("reset").onclick=()=>{location.reload()};
 $("effect").addEventListener("change",()=>{
- $("gradientFields").style.display=["gradient","dynamic_gradient"].includes($("effect").value)?"block":"none";
+ const isGradient=["gradient","dynamic_gradient"].includes($("effect").value);
+ $("gradientFields").style.display=isGradient?"block":"none";
  update();
 });
+$("gradientFields").style.display=["gradient","dynamic_gradient"].includes($("effect").value)?"block":"none";
 update();
 </script>
 </body>
