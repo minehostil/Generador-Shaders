@@ -81,7 +81,7 @@ button:hover{filter:brightness(1.08)}
 
 .mc-char { display: inline-block; position: relative; text-shadow: 2px 2px 0px rgba(0,0,0,0.8); }
 
-/* ESTILO DEL DYNAMIC GRADIENT DESPLAZABLE */
+/* ESTILO DEL GRADIENTE DESPLAZABLE Y ESTÁTICO CON TEXT-CLIP */
 .dynamic-grad-text {
   background-size: 200% 200%;
   -webkit-background-clip: text;
@@ -599,13 +599,6 @@ $("visualColorTrigger").onclick = () => openModal('visual', $("visualHexText").t
 $("grad1Trigger").onclick = () => openModal('grad1', $("grad1HexText").textContent);
 $("grad2Trigger").onclick = () => openModal('grad2', $("grad2HexText").textContent);
 
-function interpolateColor(c1, c2, factor) {
-  const r = Math.round(c1[0] + factor * (c2[0] - c1[0]));
-  const g = Math.round(c1[1] + factor * (c2[1] - c1[1]));
-  const b = Math.round(c1[2] + factor * (c2[2] - c1[2]));
-  return `rgb(${r},${g},${b})`;
-}
-
 const directionAngles = {
   "0.0": "0deg",
   "1.0": "45deg",
@@ -636,8 +629,6 @@ function update(){
 
  const c1Hex = $("grad1HexText").textContent;
  const c2Hex = $("grad2HexText").textContent;
- const c1 = rgbFromHex(c1Hex) || [255,0,0];
- const c2 = rgbFromHex(c2Hex) || [0,0,255];
  const dirVal = $("gradientDirection").value;
 
  if (effect === "dynamic_gradient") {
@@ -654,6 +645,16 @@ function update(){
    container.style.animation = `${animName} ${durSeconds}s linear infinite`;
 
    preview.appendChild(container);
+ } else if (effect === "gradient") {
+   const container = document.createElement("span");
+   container.className = "dynamic-grad-text";
+   container.textContent = text;
+   
+   const angle = directionAngles[dirVal] || "90deg";
+   container.style.backgroundImage = `linear-gradient(${angle}, ${c1Hex}, ${c2Hex})`;
+   container.style.animation = "none";
+
+   preview.appendChild(container);
  } else {
    const dur = Math.max(0.5, 3/p);
    text.split("").forEach((char, i) => {
@@ -662,10 +663,7 @@ function update(){
      span.textContent = char === " " ? "\u00A0" : char;
      const delay = (i * 0.1).toFixed(2) + "s";
 
-     if (effect === "gradient") {
-       const factor = text.length > 1 ? i / (text.length - 1) : 0;
-       span.style.color = interpolateColor(c1, c2, factor);
-     } else if (effect === "rainbow") {
+     if (effect === "rainbow") {
        span.classList.add("effect-rainbow");
        span.style.animationDuration = dur + "s";
        span.style.animationDelay = delay;
