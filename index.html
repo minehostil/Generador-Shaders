@@ -2,13 +2,15 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Text Effects Generator - Minecraft Preview</title>
 <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/minecraft-ia">
 <style>
 :root{--bg:#080b12;--panel:#10151f;--panel2:#151c28;--border:#273244;--text:#f4f7fb;--muted:#8995a8;--accent:#27f580}
 *{box-sizing:border-box}
 body{margin:0;background:radial-gradient(circle at 50% -10%,#15242b 0,#080b12 45%);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+body.modal-open { overflow: hidden; touch-action: none; }
+
 .container{width:min(1180px,94%);margin:0 auto;padding:38px 0 60px}
 header{text-align:center;margin-bottom:30px}
 h1{font-size:clamp(28px,5vw,48px);margin:0 0 8px;font-weight:800;letter-spacing:-1px}
@@ -89,13 +91,15 @@ button:hover{filter:brightness(1.08)}
 .code pre{margin:0;background:#080c12;border:1px solid var(--border);border-radius:12px;padding:15px;overflow:auto;color:#c9f8da;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}
 .code-actions{display:flex;justify-content:flex-end;margin-top:8px}
 
-/* MODAL DE COLOR */
+/* MODAL DE COLOR PROFESIONAL (Evita scroll en el fondo) */
 .modal-overlay {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
   display: flex; align-items: center; justify-content: center;
   z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+  touch-action: none;
+  overscroll-behavior: contain;
 }
 .modal-overlay.active { opacity: 1; pointer-events: auto; }
 
@@ -108,17 +112,21 @@ button:hover{filter:brightness(1.08)}
   box-shadow: 0 20px 50px rgba(0,0,0,0.6);
   display: flex; flex-direction: column; gap: 14px;
   user-select: none;
+  touch-action: none;
 }
 
 .picker-stage {
-  display: flex; gap: 12px; height: 150px;
+  display: flex; gap: 12px; height: 160px;
 }
 
+/* Mapa de Saturación / Brillo con tono puro dinámico */
 .color-map {
   flex: 1; height: 100%; border-radius: 10px; position: relative; cursor: crosshair;
-  background: linear-gradient(to top, #000, transparent),
-              linear-gradient(to right, #fff, rgba(255,255,255,0)),
-              linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+  background-color: #f00;
+  background-image: 
+    linear-gradient(to top, #000, transparent),
+    linear-gradient(to right, #fff, transparent);
+  touch-action: none;
 }
 
 .color-pointer {
@@ -127,12 +135,15 @@ button:hover{filter:brightness(1.08)}
   box-shadow: 0 0 4px rgba(0,0,0,0.8); pointer-events: none;
 }
 
-.val-bar {
+/* Barra Vertical de Tonos (Hue Slider) */
+.hue-bar {
   width: 24px; height: 100%; border-radius: 8px; position: relative; cursor: pointer;
-  background: linear-gradient(to bottom, #fff, #000);
+  background: linear-gradient(to bottom, 
+    #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+  touch-action: none;
 }
 
-.val-pointer {
+.hue-pointer {
   width: 18px; height: 18px; border: 2px solid #fff; border-radius: 50%;
   position: absolute; left: 50%; transform: translate(-50%, -50%);
   box-shadow: 0 0 4px rgba(0,0,0,0.8); pointer-events: none;
@@ -150,7 +161,7 @@ button:hover{filter:brightness(1.08)}
 }
 
 .modal-preview-bar {
-  height: 36px; border-radius: 10px; width: 100%;
+  height: 36px; border-radius: 10px; width: 100%; border: 1px solid rgba(255,255,255,0.1);
 }
 
 .save-btn {
@@ -338,10 +349,10 @@ small{color:var(--muted)}
   <div class="color-modal">
     <div class="picker-stage">
       <div class="color-map" id="colorMap">
-        <div class="color-pointer" id="colorPointer" style="left:50%; top:50%;"></div>
+        <div class="color-pointer" id="colorPointer" style="left:100%; top:0%;"></div>
       </div>
-      <div class="val-bar" id="valBar">
-        <div class="val-pointer" id="valPointer" style="top:0%;"></div>
+      <div class="hue-bar" id="hueBar">
+        <div class="hue-pointer" id="huePointer" style="top:0%;"></div>
       </div>
     </div>
 
@@ -417,11 +428,13 @@ function openModal(target, initialHex) {
   const [h, s, v] = rgbToHsv(rgb[0], rgb[1], rgb[2]);
   currentH = h; currentS = s; currentV = v;
 
+  document.body.classList.add("modal-open");
   updateModalUI(hexFromRgb(rgb[0], rgb[1], rgb[2]));
   $("colorModal").classList.add("active");
 }
 
 function closeModal() {
+  document.body.classList.remove("modal-open");
   $("colorModal").classList.remove("active");
 }
 
@@ -429,16 +442,21 @@ function updateModalUI(hex) {
   $("modalHexInput").value = hex;
   $("modalPreviewBar").style.background = hex;
 
-  $("colorPointer").style.left = (currentH * 100) + "%";
-  $("colorPointer").style.top = ((1 - currentS) * 100) + "%";
-  $("valPointer").style.top = ((1 - currentV) * 100) + "%";
+  // Actualiza el fondo puro de la caja del mapa según el tono (Hue)
+  const pureRgb = hsvToRgb(currentH, 1, 1);
+  $("colorMap").style.backgroundColor = `rgb(${pureRgb[0]},${pureRgb[1]},${pureRgb[2]})`;
+
+  // Punteros
+  $("colorPointer").style.left = (currentS * 100) + "%";
+  $("colorPointer").style.top = ((1 - currentV) * 100) + "%";
+  $("huePointer").style.top = (currentH * 100) + "%";
 }
 
-// LÓGICA DE INTERACCIÓN Y DRAG CORREGIDA
 let isDraggingMap = false;
-let isDraggingVal = false;
+let isDraggingHue = false;
 
 function handleMapMove(e) {
+  if (e.cancelable) e.preventDefault();
   const rect = $("colorMap").getBoundingClientRect();
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
   const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -446,45 +464,46 @@ function handleMapMove(e) {
   let x = clamp(clientX - rect.left, 0, rect.width);
   let y = clamp(clientY - rect.top, 0, rect.height);
 
-  currentH = x / rect.width;
-  currentS = 1 - (y / rect.height);
-
-  const [r, g, b] = hsvToRgb(currentH, currentS, currentV);
-  updateModalUI(hexFromRgb(r, g, b));
-}
-
-function handleValMove(e) {
-  const rect = $("valBar").getBoundingClientRect();
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-  let y = clamp(clientY - rect.top, 0, rect.height);
-
+  currentS = x / rect.width;
   currentV = 1 - (y / rect.height);
 
   const [r, g, b] = hsvToRgb(currentH, currentS, currentV);
   updateModalUI(hexFromRgb(r, g, b));
 }
 
-// Eventos de ratón
-$("colorMap").addEventListener("mousedown", e => { isDraggingMap = true; handleMapMove(e); });
-$("valBar").addEventListener("mousedown", e => { isDraggingVal = true; handleValMove(e); });
+function handleHueMove(e) {
+  if (e.cancelable) e.preventDefault();
+  const rect = $("hueBar").getBoundingClientRect();
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-// Eventos táctiles (Móvil)
-$("colorMap").addEventListener("touchstart", e => { isDraggingMap = true; handleMapMove(e); }, {passive: true});
-$("valBar").addEventListener("touchstart", e => { isDraggingVal = true; handleValMove(e); }, {passive: true});
+  let y = clamp(clientY - rect.top, 0, rect.height);
+
+  currentH = y / rect.height;
+
+  const [r, g, b] = hsvToRgb(currentH, currentS, currentV);
+  updateModalUI(hexFromRgb(r, g, b));
+}
+
+// Eventos del Mouse
+$("colorMap").addEventListener("mousedown", e => { isDraggingMap = true; handleMapMove(e); });
+$("hueBar").addEventListener("mousedown", e => { isDraggingHue = true; handleHueMove(e); });
+
+// Eventos Táctiles con preventDefault para evitar desplazar el sitio web de fondo
+$("colorMap").addEventListener("touchstart", e => { isDraggingMap = true; handleMapMove(e); }, {passive: false});
+$("hueBar").addEventListener("touchstart", e => { isDraggingHue = true; handleHueMove(e); }, {passive: false});
 
 window.addEventListener("mousemove", e => {
   if (isDraggingMap) handleMapMove(e);
-  if (isDraggingVal) handleValMove(e);
+  if (isDraggingHue) handleHueMove(e);
 });
 
 window.addEventListener("touchmove", e => {
   if (isDraggingMap) handleMapMove(e);
-  if (isDraggingVal) handleValMove(e);
-}, {passive: true});
+  if (isDraggingHue) handleHueMove(e);
+}, {passive: false});
 
-window.addEventListener("mouseup", () => { isDraggingMap = false; isDraggingVal = false; });
-window.addEventListener("touchend", () => { isDraggingMap = false; isDraggingVal = false; });
+window.addEventListener("mouseup", () => { isDraggingMap = false; isDraggingHue = false; });
+window.addEventListener("touchend", () => { isDraggingMap = false; isDraggingHue = false; });
 
 $("modalHexInput").addEventListener("input", e => {
   const hex = e.target.value;
