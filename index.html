@@ -53,14 +53,22 @@ button:hover{filter:brightness(1.08)}
 .actions{display:flex;gap:9px;flex-wrap:wrap}
 
 .preview{min-height:430px;display:flex;flex-direction:column}
+
+/* FONDO CON IMAGEN DESENFOCADA Y CAPA OSCURA */
 .preview-stage{
   flex:1;min-height:330px;border-radius:14px;
-  background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)),
-              url('https://i.imgur.com/3Z5aK2H.png') center/cover no-repeat;
-  display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative; padding:20px;
+  position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; padding:20px;
+}
+
+.preview-bg-image {
+  position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px;
+  background: url('fondo-pantano.jpg') center/cover no-repeat;
+  filter: blur(6px) brightness(0.65);
+  z-index: 1;
 }
 
 .mc-single-tooltip {
+  position: relative; z-index: 2;
   background: rgba(16, 0, 16, 0.94); border: 3px solid #28005b; outline: 3px solid #100010;
   box-shadow: inset 0 0 0 2px #100010, 0 10px 25px rgba(0,0,0,0.7); padding: 10px 16px;
   border-radius: 4px; font-family: 'Minecraft', 'MinecraftIA', monospace, sans-serif; user-select: none; display: inline-block;
@@ -83,7 +91,7 @@ button:hover{filter:brightness(1.08)}
   filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.8));
 }
 
-.preview-label{position:absolute;left:15px;top:12px;font-size:11px;color:#aab5c7;font-family:monospace;background:rgba(0,0,0,0.5);padding:2px 6px;border-radius:4px}
+.preview-label{position:absolute;left:15px;top:12px;z-index:2;font-size:11px;color:#aab5c7;font-family:monospace;background:rgba(0,0,0,0.5);padding:2px 6px;border-radius:4px}
 .code{margin-top:18px}
 .code pre{margin:0;background:#080c12;border:1px solid var(--border);border-radius:12px;padding:15px;overflow:auto;color:#c9f8da;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}
 .code-actions{display:flex;justify-content:flex-end;margin-top:8px}
@@ -295,6 +303,7 @@ small{color:var(--muted)}
 <section class="panel preview">
 <h2>Previsualización en Minecraft</h2>
 <div class="preview-stage">
+<div class="preview-bg-image"></div>
 <span class="preview-label">MINECRAFT TOOLTIP PREVIEW</span>
 
 <div class="mc-single-tooltip">
@@ -597,16 +606,15 @@ function interpolateColor(c1, c2, factor) {
   return `rgb(${r},${g},${b})`;
 }
 
-// Mapas de grados en CSS para las 8 direcciones GLSL (0.0 a 7.0)
 const directionAngles = {
-  "0.0": "0deg",    // Arriba
-  "1.0": "45deg",   // Arriba-Derecha
-  "2.0": "90deg",   // Derecha
-  "3.0": "135deg",  // Abajo-Derecha
-  "4.0": "180deg",  // Abajo
-  "5.0": "225deg",  // Abajo-Izquierda
-  "6.0": "270deg",  // Izquierda
-  "7.0": "315deg"   // Arriba-Izquierda
+  "0.0": "0deg",
+  "1.0": "45deg",
+  "2.0": "90deg",
+  "3.0": "135deg",
+  "4.0": "180deg",
+  "5.0": "225deg",
+  "6.0": "270deg",
+  "7.0": "315deg"
 };
 
 function update(){
@@ -633,7 +641,6 @@ function update(){
  const dirVal = $("gradientDirection").value;
 
  if (effect === "dynamic_gradient") {
-   // Generar gradiente continuo desplazable según dirección seleccionada (0.0 a 7.0)
    const container = document.createElement("span");
    container.className = "dynamic-grad-text";
    container.textContent = text;
