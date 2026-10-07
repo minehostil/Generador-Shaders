@@ -43,41 +43,26 @@ button:hover{filter:brightness(1.08)}
   padding:20px;
 }
 
-.mc-tooltip {
+/* Tooltip compacto solo para el texto */
+.mc-single-tooltip {
   background: rgba(16, 0, 16, 0.94);
   border: 3px solid #28005b;
   outline: 3px solid #100010;
   box-shadow: inset 0 0 0 2px #100010, 0 10px 25px rgba(0,0,0,0.7);
-  padding: 16px 20px;
+  padding: 10px 16px;
   border-radius: 4px;
   font-family: 'Minecraft', 'MinecraftIA', monospace, sans-serif;
-  color: #fff;
-  line-height: 1.6;
-  max-width: 100%;
   user-select: none;
+  display: inline-block;
 }
 
-.mc-title { font-size: 18px; color: #ff55ff; margin-bottom: 2px; text-shadow: 2px 2px 0px #3f153f; }
-.mc-subtitle { font-size: 13px; color: #55ffff; margin-bottom: 12px; text-shadow: 2px 2px 0px #153f3f; }
-.mc-desc { font-size: 14px; color: #aaaaaa; margin-bottom: 10px; text-shadow: 2px 2px 0px #2a2a2a; }
-.mc-chat-line { font-size: 16px; margin-bottom: 10px; text-shadow: 2px 2px 0px #1b1b1b; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
-.mc-footer { font-size: 14px; color: #ffaa00; text-shadow: 2px 2px 0px #3f2a00; }
-
-.mc-tag-level { color: #55ff55; text-shadow: 2px 2px 0 #153f15; }
-.mc-tag-team { color: #ff55ff; text-shadow: 2px 2px 0 #3f153f; }
-.mc-tag-rank { background: #555555; color: #ffffff; padding: 0 4px; border-radius: 2px; font-size: 12px; height: 20px; display: inline-flex; align-items: center; text-shadow: 1px 1px 0 #000; }
-.mc-tag-user { color: #55ffff; text-shadow: 2px 2px 0 #153f3f; }
-.mc-arrow { color: #ff55ff; text-shadow: 2px 2px 0 #3f153f; margin: 0 4px; }
-
-/* Contenedor del texto recortado letra por letra */
 .preview-text {
-  font-size: 16px;
+  font-size: 20px;
   font-family: 'Minecraft', 'MinecraftIA', monospace, sans-serif;
   display: inline-flex;
   white-space: pre;
 }
 
-/* Estilo individual para cada caracter */
 .mc-char {
   display: inline-block;
   position: relative;
@@ -248,22 +233,9 @@ small{color:var(--muted)}
 <div class="preview-stage">
 <span class="preview-label">MINECRAFT TOOLTIP PREVIEW</span>
 
-<div class="mc-tooltip">
-  <div class="mc-title">Opción 10</div>
-  <div class="mc-subtitle">INFORMACION</div>
-  <div class="mc-desc">Así se verá cuando escribas en el chat.</div>
-  
-  <div class="mc-chat-line">
-    <span style="color:#888">-</span>
-    <span class="mc-tag-level">[Lvl 10]</span>
-    <span class="mc-tag-team">MiEquipo</span>
-    <span class="mc-tag-rank">EXPLORADOR</span>
-    <span class="mc-tag-user">MVK_0</span>
-    <span class="mc-arrow">&raquo;</span>
-    <div id="preview" class="preview-text"></div>
-  </div>
-
-  <div class="mc-footer">&rarr; Clic para seleccionar!</div>
+<!-- Solo el cuadro de tooltip con el texto animado -->
+<div class="mc-single-tooltip">
+  <div id="preview" class="preview-text"></div>
 </div>
 
 </div>
@@ -322,7 +294,6 @@ function update(){
  const c1 = rgbFromHex($("grad1").value) || [255,0,0];
  const c2 = rgbFromHex($("grad2").value) || [0,255,0];
 
- // Construcción por caracter individual
  text.split("").forEach((char, i) => {
    const span = document.createElement("span");
    span.className = "mc-char";
@@ -360,7 +331,6 @@ function update(){
    preview.appendChild(span);
  });
 
- // Configuración del bloque C++
  const rgb=[$("r").value,$("g").value,$("b").value];
  const id=`${rgb[0]}, ${rgb[1]}, ${rgb[2]}`;
  let body="";
