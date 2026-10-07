@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Text Effects Generator</title>
+<title>Text Effects Generator - Minecraft Preview</title>
+<!-- Fuente pixelada estilo Minecraft -->
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/minecraft-ia">
 <style>
 :root{--bg:#080b12;--panel:#10151f;--panel2:#151c28;--border:#273244;--text:#f4f7fb;--muted:#8995a8;--accent:#27f580}
 *{box-sizing:border-box}
@@ -32,36 +34,78 @@ button{border:0;border-radius:10px;padding:11px 14px;background:#27f580;color:#0
 button.secondary{background:#202a39;color:#e9eef6}
 button:hover{filter:brightness(1.08)}
 .actions{display:flex;gap:9px;flex-wrap:wrap}
+
+/* Previsualización estilo Minecraft */
 .preview{min-height:430px;display:flex;flex-direction:column}
-.preview-stage{flex:1;min-height:330px;border-radius:14px;border:1px dashed #344052;background:
-linear-gradient(45deg,#111720 25%,transparent 25%) 0 0/24px 24px,
-linear-gradient(-45deg,#111720 25%,transparent 25%) 0 0/24px 24px,
-linear-gradient(45deg,transparent 75%,#111720 75%) 0 0/24px 24px,
-linear-gradient(-45deg,transparent 75%,#111720 75%) 0 0/24px 24px,#0c1119;
-display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-.preview-text{font-size:clamp(35px,7vw,82px);font-weight:900;letter-spacing:1px;position:relative;text-align:center;white-space:nowrap}
-.preview-label{position:absolute;left:15px;top:12px;font-size:11px;color:#68758a;font-family:monospace}
+.preview-stage{
+  flex:1;min-height:330px;border-radius:14px;
+  background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)),
+              url('https://i.imgur.com/3Z5aK2H.png') center/cover no-repeat;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;
+  padding:20px;
+}
+
+/* Tooltip Minecraft GUI */
+.mc-tooltip {
+  background: rgba(16, 0, 16, 0.94);
+  border: 3px solid #28005b;
+  outline: 3px solid #100010;
+  box-shadow: inset 0 0 0 2px #100010, 0 10px 25px rgba(0,0,0,0.7);
+  padding: 16px 20px;
+  border-radius: 4px;
+  font-family: 'Minecraft', 'MinecraftIA', monospace, sans-serif;
+  color: #fff;
+  line-height: 1.6;
+  max-width: 100%;
+  image-rendering: pixelated;
+  user-select: none;
+}
+
+.mc-title { font-size: 18px; color: #ff55ff; margin-bottom: 2px; text-shadow: 2px 2px 0px #3f153f; }
+.mc-subtitle { font-size: 13px; color: #55ffff; margin-bottom: 12px; text-shadow: 2px 2px 0px #153f3f; }
+.mc-desc { font-size: 14px; color: #aaaaaa; margin-bottom: 10px; text-shadow: 2px 2px 0px #2a2a2a; }
+.mc-chat-line { font-size: 16px; margin-bottom: 10px; text-shadow: 2px 2px 0px #1b1b1b; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.mc-footer { font-size: 14px; color: #ffaa00; text-shadow: 2px 2px 0px #3f2a00; }
+
+/* Tag estilizado para [NIVEL] o Nombres */
+.mc-tag-level { color: #55ff55; text-shadow: 2px 2px 0 #153f15; }
+.mc-tag-team { color: #ff55ff; text-shadow: 2px 2px 0 #3f153f; }
+.mc-tag-rank { background: #555555; color: #ffffff; padding: 0 4px; border-radius: 2px; font-size: 12px; height: 20px; display: inline-flex; align-items: center; text-shadow: 1px 1px 0 #000; }
+.mc-tag-user { color: #55ffff; text-shadow: 2px 2px 0 #153f3f; }
+.mc-arrow { color: #ff55ff; text-shadow: 2px 2px 0 #3f153f; margin: 0 4px; }
+
+.preview-text{
+  font-size: 16px;
+  font-family: 'Minecraft', 'MinecraftIA', monospace, sans-serif;
+  position:relative;
+  white-space:nowrap;
+  display: inline-block;
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+}
+.preview-label{position:absolute;left:15px;top:12px;font-size:11px;color:#aab5c7;font-family:monospace;background:rgba(0,0,0,0.5);padding:2px 6px;border-radius:4px}
+
 .code{margin-top:18px}
 .code pre{margin:0;background:#080c12;border:1px solid var(--border);border-radius:12px;padding:15px;overflow:auto;color:#c9f8da;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}
 .code-actions{display:flex;justify-content:flex-end;margin-top:8px}
-.swatches{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.swatch{width:28px;height:28px;border-radius:7px;border:1px solid rgba(255,255,255,.2);cursor:pointer}
-@keyframes shake{0%,100%{transform:translate(0)}25%{transform:translate(-4px,2px)}50%{transform:translate(4px,-2px)}75%{transform:translate(-2px,-3px)}}
-@keyframes wavy{0%,100%{transform:translateY(0)}50%{transform:translateY(-13px)}}
-@keyframes bounce{0%,100%{transform:translateY(0)}45%{transform:translateY(-24px)}65%{transform:translateY(-7px)}}
+
+/* Animaciones */
+@keyframes shake{0%,100%{transform:translate(0)}25%{transform:translate(-2px,1px)}50%{transform:translate(2px,-1px)}75%{transform:translate(-1px,-2px)}}
+@keyframes wavy{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}45%{transform:translateY(-12px)}65%{transform:translateY(-3px)}}
 @keyframes blink{0%,45%{opacity:1}50%,100%{opacity:.12}}
-@keyframes pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.13);opacity:1}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.1);opacity:1}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes seqspin{0%{transform:rotate(0)}45%{transform:rotate(360deg)}100%{transform:rotate(360deg)}}
 @keyframes fade{0%,100%{opacity:.2}50%{opacity:1}}
-@keyframes jump{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
-@keyframes glitch{0%,100%{text-shadow:2px 0 #f00,-2px 0 #0ff}20%{transform:translate(-2px)}40%{transform:translate(2px)}60%{text-shadow:-3px 0 #f00,3px 0 #0ff}}
+@keyframes jump{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes glitch{0%,100%{text-shadow:2px 0 #f00,-2px 0 #0ff}20%{transform:translate(-2px)}40%{transform:translate(2px)}60%{text-shadow:-2px 0 #f00,2px 0 #0ff}}
 @keyframes lava{0%,100%{filter:brightness(1)}50%{filter:brightness(1.45) saturate(1.4)}}
 @keyframes rainbow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
 @keyframes gradientMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 @keyframes gradientSweep{0%{background-position:0% 50%}100%{background-position:200% 50%}}
-@keyframes offsetPreview{0%,100%{transform:translateY(0)}50%{transform:translateY(-40px)}}
-@keyframes scalePreview{0%,100%{transform:scale(1)}50%{transform:scale(1.5)}}
+@keyframes offsetPreview{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+@keyframes scalePreview{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+
 .gradient-animated{background-size:200% 100%;animation:gradientMove 2.5s ease-in-out infinite}
 .dynamic-gradient-animated{background-size:300% 100%;animation:gradientSweep 2s linear infinite}
 .effect-shake{animation:shake .25s infinite}
@@ -93,6 +137,11 @@ small{color:var(--muted)}
 <div class="layout">
 <section class="panel">
 <h2>Configuración</h2>
+
+<div class="field">
+<label>Texto a probar</label>
+<input id="sampleText" type="text" value="Hola MineHostil">
+</div>
 
 <div class="field">
 <label>Efecto</label>
@@ -193,10 +242,29 @@ small{color:var(--muted)}
 </section>
 
 <section class="panel preview">
-<h2>Previsualización</h2>
+<h2>Previsualización en Minecraft</h2>
 <div class="preview-stage">
-<span class="preview-label">LIVE PREVIEW</span>
-<div id="preview" class="preview-text">TU TEXTO</div>
+<span class="preview-label">MINECRAFT TOOLTIP PREVIEW</span>
+
+<!-- Minecraft Tooltip Container -->
+<div class="mc-tooltip">
+  <div class="mc-title">Opción 10</div>
+  <div class="mc-subtitle">INFORMACION</div>
+  <div class="mc-desc">Así se verá cuando escribas en el chat.</div>
+  
+  <div class="mc-chat-line">
+    <span style="color:#888">-</span>
+    <span class="mc-tag-level">[Lvl 10]</span>
+    <span class="mc-tag-team">MiEquipo</span>
+    <span class="mc-tag-rank">EXPLORADOR</span>
+    <span class="mc-tag-user">MVK_0</span>
+    <span class="mc-arrow">&raquo;</span>
+    <div id="preview" class="preview-text">Hola MineHostil</div>
+  </div>
+
+  <div class="mc-footer">&rarr; Clic para seleccionar!</div>
+</div>
+
 </div>
 <div class="code">
 <pre id="output"></pre>
@@ -218,8 +286,7 @@ function hexFromRgb(r,g,b){return "#"+[r,g,b].map(x=>clamp(Number(x)||0,0,255).t
 function setMainHex(hex){
  const rgb=rgbFromHex(hex); if(!rgb)return;
  $("hex").value=hex.toUpperCase();
- ["r","g","b"].forEach((id,i)=>$(id).value=rgb[i]);
- $("color").value=hex;
+ ["r","g","b"].forEach((id,i)=>$(id).value=rgb[i]);$("color").value=hex;
 }
 function setVisualHex(hex){
  const rgb=rgbFromHex(hex); if(!rgb)return;
@@ -239,10 +306,8 @@ function update(){
  const preview=$("preview");
  preview.className="preview-text";
  preview.style.cssText="";
- preview.textContent="TU TEXTO";
+ preview.textContent=$("sampleText").value || "Hola MineHostil";
 
- // The preview intentionally uses the visual colors, not the identifier RGB.
- // The identifier RGB is only used by the TEXT_EFFECT macro.
  if(effect==="gradient" || effect==="dynamic_gradient"){
    preview.classList.add("gradient");
    preview.style.backgroundImage=cssGradient();
@@ -293,7 +358,6 @@ function update(){
    preview.style.animationDuration=speed+"s";
  }
 
- // Update the generated configuration.
  const rgb=[$("r").value,$("g").value,$("b").value];
  const id=`${rgb[0]}, ${rgb[1]}, ${rgb[2]}`;
  let body="";
@@ -337,7 +401,7 @@ $("effectColor").addEventListener("input",e=>{setVisualHex(e.target.value);updat
 $("effectHex").addEventListener("input",e=>{const r=rgbFromHex(e.target.value);if(r){$("effectColor").value=e.target.value;update()}});
 ["grad1","grad2"].forEach((id,i)=>$(id).addEventListener("input",()=>{$("gradHex"+(i+1)).value=$("grad"+(i+1)).value.toUpperCase();update()}));
 ["gradHex1","gradHex2"].forEach((id,i)=>$(id).addEventListener("input",()=>syncGradientHex(i+1)));
-["effect","param","duration","shadow"].forEach(id=>$(id).addEventListener("input",update));
+["effect","param","duration","shadow","sampleText"].forEach(id=>$(id).addEventListener("input",update));
 $("random").onclick=()=>{const h=hexFromRgb(Math.random()*256,Math.random()*256,Math.random()*256);setMainHex(h);update()};
 function copy(){navigator.clipboard.writeText($("output").textContent);$("copy").textContent="¡Copiado!";$("copy2").textContent="¡Copiado!";setTimeout(()=>{$("copy").textContent="Copiar código";$("copy2").textContent="Copiar configuración"},1200)}
 $("copy").onclick=copy;$("copy2").onclick=copy;
