@@ -75,7 +75,7 @@ button:hover{filter:brightness(1.08)}
 
 /* ESTILO DEL DYNAMIC GRADIENT DESPLAZABLE */
 .dynamic-grad-text {
-  background-size: 200% 100%;
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
@@ -150,8 +150,14 @@ button:hover{filter:brightness(1.08)}
 .save-btn { background: #a29bfe; color: #121026; font-weight: 800; padding: 12px; border-radius: 12px; text-align: center; cursor: pointer; border: none; font-size: 14px; }
 
 /* ANIMACIONES DE SHADERS Y GRADIENTES DESPLAZABLES */
-@keyframes shift-gradient-right { 0% { background-position: 0% 0%; } 100% { background-position: -200% 0%; } }
-@keyframes shift-gradient-left { 0% { background-position: 0% 0%; } 100% { background-position: 200% 0%; } }
+@keyframes dir-0 { 0% { background-position: 0% 100%; } 100% { background-position: 0% -100%; } }
+@keyframes dir-1 { 0% { background-position: 0% 100%; } 100% { background-position: -100% 0%; } }
+@keyframes dir-2 { 0% { background-position: 0% 0%; } 100% { background-position: -200% 0%; } }
+@keyframes dir-3 { 0% { background-position: 0% 0%; } 100% { background-position: -100% -100%; } }
+@keyframes dir-4 { 0% { background-position: 0% 0%; } 100% { background-position: 0% -200%; } }
+@keyframes dir-5 { 0% { background-position: 100% 0%; } 100% { background-position: 0% -100%; } }
+@keyframes dir-6 { 0% { background-position: 0% 0%; } 100% { background-position: 200% 0%; } }
+@keyframes dir-7 { 0% { background-position: 100% 100%; } 100% { background-position: 0% 0%; } }
 
 @keyframes shake{0%,100%{transform:translate(0)}25%{transform:translate(-1px,1px)}50%{transform:translate(1px,-1px)}75%{transform:translate(-1px,-1px)}}
 @keyframes wavy{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
@@ -243,12 +249,18 @@ small{color:var(--muted)}
 </div>
 </div>
 
-<!-- SELECTOR DE DIRECCIÓN DEL SHADER -->
+<!-- SELECTOR DE DIRECCIÓN DEL SHADER DE GRADIENTE -->
 <div class="field" id="directionField" style="display:none">
-<label>Dirección del Desplazamiento</label>
+<label>Dirección del Gradiente (Direction)</label>
 <select id="gradientDirection">
-  <option value="right" selected>Izquierda → Derecha</option>
-  <option value="left">Derecha → Izquierda</option>
+  <option value="0.0">0: Arriba (↑)</option>
+  <option value="1.0">1: Diagonal Arriba-Derecha (↗)</option>
+  <option value="2.0" selected>2: Derecha / Horizontal (→)</option>
+  <option value="3.0">3: Diagonal Abajo-Derecha (↘)</option>
+  <option value="4.0">4: Abajo / Vertical (↓)</option>
+  <option value="5.0">5: Diagonal Abajo-Izquierda (↙)</option>
+  <option value="6.0">6: Izquierda (←)</option>
+  <option value="7.0">7: Diagonal Arriba-Izquierda (↖)</option>
 </select>
 </div>
 
@@ -298,7 +310,7 @@ small{color:var(--muted)}
 </div>
 </div>
 
-<!-- POPUP SMOOTH SELECCIÓN DE EFECTOS -->
+<!-- POPUP SELECCIÓN DE EFECTOS -->
 <div class="modal-overlay" id="effectsModal">
   <div class="effects-modal">
     <div class="modal-header-title">
@@ -585,6 +597,18 @@ function interpolateColor(c1, c2, factor) {
   return `rgb(${r},${g},${b})`;
 }
 
+// Mapas de grados en CSS para las 8 direcciones GLSL (0.0 a 7.0)
+const directionAngles = {
+  "0.0": "0deg",    // Arriba
+  "1.0": "45deg",   // Arriba-Derecha
+  "2.0": "90deg",   // Derecha
+  "3.0": "135deg",  // Abajo-Derecha
+  "4.0": "180deg",  // Abajo
+  "5.0": "225deg",  // Abajo-Izquierda
+  "6.0": "270deg",  // Izquierda
+  "7.0": "315deg"   // Arriba-Izquierda
+};
+
 function update(){
  const effect = currentEffect;
  const visual = $("visualHexText").textContent;
@@ -596,7 +620,7 @@ function update(){
 
  const isGrad = effect === "gradient" || effect === "dynamic_gradient";
  $("gradientFields").style.display = isGrad ? "block" : "none";
- $("directionField").style.display = effect === "dynamic_gradient" ? "block" : "none";
+ $("directionField").style.display = isGrad ? "block" : "none";
 
  const text = $("sampleText").value || "Hola MineHostil";
  const preview = $("preview");
@@ -606,18 +630,20 @@ function update(){
  const c2Hex = $("grad2HexText").textContent;
  const c1 = rgbFromHex(c1Hex) || [255,0,0];
  const c2 = rgbFromHex(c2Hex) || [0,0,255];
+ const dirVal = $("gradientDirection").value;
 
  if (effect === "dynamic_gradient") {
-   // Generar gradiente continuo desplazable para todo el texto
+   // Generar gradiente continuo desplazable según dirección seleccionada (0.0 a 7.0)
    const container = document.createElement("span");
    container.className = "dynamic-grad-text";
    container.textContent = text;
    
-   const dir = $("gradientDirection").value;
-   const animName = dir === "right" ? "shift-gradient-right" : "shift-gradient-left";
+   const dirIndex = Math.round(parseFloat(dirVal));
+   const animName = `dir-${dirIndex}`;
+   const angle = directionAngles[dirVal] || "90deg";
    const durSeconds = Math.max(0.5, 3000 / speed);
 
-   container.style.backgroundImage = `linear-gradient(90deg, ${c1Hex}, ${c2Hex}, ${c1Hex})`;
+   container.style.backgroundImage = `linear-gradient(${angle}, ${c1Hex}, ${c2Hex}, ${c1Hex})`;
    container.style.animation = `${animName} ${durSeconds}s linear infinite`;
 
    preview.appendChild(container);
@@ -677,10 +703,9 @@ function update(){
  else if(effect==="bouncy_rainbow") body=`    apply_bouncy();\n    apply_rainbow();`;
  else if(effect==="scale") body=`    apply_scale(1.5);\n    apply_color(rgb(${visualRgb()}));`;
  else if(effect==="offset") body=`    apply_offset(0.0, 40.0);\n    apply_color(rgb(${visualRgb()}));`;
- else if(effect==="gradient") body=`    apply_gradient(rgb(${gradRgb(1)}), rgb(${gradRgb(2)}), ${p.toFixed(1)});`;
+ else if(effect==="gradient") body=`    apply_gradient(rgb(${gradRgb(1)}), rgb(${gradRgb(2)}), ${dirVal});`;
  else if(effect==="dynamic_gradient") {
-   const dirLabel = $("gradientDirection").value === "right" ? "Right" : "Left";
-   body=`    // Direction: ${dirLabel}\n    apply_dynamic_gradient(rgb(${gradRgb(1)}), rgb(${gradRgb(2)}), ${p.toFixed(1)}, ${speed.toFixed(1)});`;
+   body=`    apply_gradient(rgb(${gradRgb(1)}), rgb(${gradRgb(2)}), ${dirVal});\n    apply_wavy(${p.toFixed(1)});`;
  }
 
  const label = $("selectedEffectLabel").textContent;
