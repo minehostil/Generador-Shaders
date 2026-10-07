@@ -20,9 +20,25 @@ h1{font-size:clamp(28px,5vw,48px);margin:0 0 8px;font-weight:800;letter-spacing:
 label{display:block;font-size:12px;font-weight:700;color:#aab5c7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
 select,input[type=text],input[type=number]{width:100%;border:1px solid var(--border);background:#0b1018;color:var(--text);border-radius:10px;padding:11px 12px;outline:none}
 select:focus,input:focus{border-color:#27f580}
-.color-row{display:flex;gap:10px}
-input[type=color]{width:54px;height:42px;padding:3px;background:#0b1018;border:1px solid var(--border);border-radius:10px;cursor:pointer}
-.hex{flex:1}
+
+/* Botón trigger para abrir el modal de color */
+.color-picker-trigger {
+  width: 100%;
+  height: 44px;
+  background: #0b1018;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.color-picker-trigger:hover { border-color: var(--accent); }
+.color-preview-box { width: 26px; height: 26px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); }
+.color-hex-text { font-family: monospace; font-weight: bold; font-size: 14px; color: #fff; flex: 1; }
+
 .rgb{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:9px}
 .range-line{display:flex;align-items:center;gap:10px}
 input[type=range]{width:100%;accent-color:#27f580}
@@ -43,7 +59,6 @@ button:hover{filter:brightness(1.08)}
   padding:20px;
 }
 
-/* Tooltip compacto solo para el texto */
 .mc-single-tooltip {
   background: rgba(16, 0, 16, 0.94);
   border: 3px solid #28005b;
@@ -75,7 +90,77 @@ button:hover{filter:brightness(1.08)}
 .code pre{margin:0;background:#080c12;border:1px solid var(--border);border-radius:12px;padding:15px;overflow:auto;color:#c9f8da;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}
 .code-actions{display:flex;justify-content:flex-end;margin-top:8px}
 
-/* Animaciones per-char */
+/* MODAL DE COLOR INSPIRADO EN LA IMAGEN */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+}
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+.color-modal {
+  background: #1d1b3a;
+  border: 2px solid #3b376d;
+  border-radius: 20px;
+  width: 340px;
+  padding: 20px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+.picker-stage {
+  display: flex; gap: 12px; height: 150px;
+}
+
+.color-map {
+  flex: 1; height: 100%; border-radius: 10px; position: relative; cursor: crosshair;
+  background: linear-gradient(to top, #000, transparent),
+              linear-gradient(to right, #fff, rgba(255,255,255,0)),
+              linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+}
+
+.color-pointer {
+  width: 14px; height: 14px; border: 2px solid #fff; border-radius: 50%;
+  position: absolute; transform: translate(-50%, -50%);
+  box-shadow: 0 0 4px rgba(0,0,0,0.8); pointer-events: none;
+}
+
+.val-bar {
+  width: 24px; height: 100%; border-radius: 8px; position: relative; cursor: pointer;
+  background: linear-gradient(to bottom, #fff, #000);
+}
+
+.val-pointer {
+  width: 18px; height: 18px; border: 2px solid #fff; border-radius: 50%;
+  position: absolute; left: 50%; transform: translate(-50%, -50%);
+  box-shadow: 0 0 4px rgba(0,0,0,0.8); pointer-events: none;
+}
+
+.modal-label {
+  text-align: center; font-size: 11px; font-weight: 700; color: #a4a1cb;
+  letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 4px;
+}
+
+.hex-input-box {
+  background: #121026; border-radius: 10px; padding: 10px;
+  text-align: center; font-family: monospace; font-size: 16px;
+  color: #fff; border: 1px solid #3b376d; width: 100%; outline: none;
+}
+
+.modal-preview-bar {
+  height: 36px; border-radius: 10px; width: 100%;
+}
+
+.save-btn {
+  background: #a29bfe; color: #121026; font-weight: 800;
+  padding: 12px; border-radius: 12px; text-align: center;
+  cursor: pointer; border: none; font-size: 14px;
+}
+.save-btn:hover { background: #b8b2ff; }
+
+/* Keyframes */
 @keyframes shake{0%,100%{transform:translate(0)}25%{transform:translate(-1px,1px)}50%{transform:translate(1px,-1px)}75%{transform:translate(-1px,-1px)}}
 @keyframes wavy{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @keyframes bounce{0%,100%{transform:translateY(0)}45%{transform:translateY(-8px)}65%{transform:translateY(-2px)}}
@@ -168,9 +253,9 @@ small{color:var(--muted)}
 
 <div class="field">
 <label>Color identificador</label>
-<div class="color-row">
-<input id="color" type="color" value="#27F580">
-<input id="hex" class="hex" type="text" value="#27F580" maxlength="7">
+<div class="color-picker-trigger" id="mainColorTrigger">
+  <div class="color-preview-box" id="mainColorPreview" style="background: #27F580;"></div>
+  <span class="color-hex-text" id="mainHexText">#27F580</span>
 </div>
 <div class="rgb">
 <input id="r" type="number" min="0" max="255" value="39">
@@ -182,21 +267,23 @@ small{color:var(--muted)}
 
 <div class="field" id="effectColorField">
 <label>Color visual del texto</label>
-<div class="color-row">
-<input id="effectColor" type="color" value="#FF5050">
-<input id="effectHex" class="hex" type="text" value="#FF5050" maxlength="7">
+<div class="color-picker-trigger" id="visualColorTrigger">
+  <div class="color-preview-box" id="visualColorPreview" style="background: #FF5050;"></div>
+  <span class="color-hex-text" id="visualHexText">#FF5050</span>
 </div>
 </div>
 
 <div class="field" id="gradientFields" style="display:none">
 <label>Colores del gradiente</label>
-<div class="color-row">
-<input id="grad1" type="color" value="#FF0000">
-<input id="grad2" type="color" value="#00FF00">
-</div>
-<div class="rgb" style="grid-template-columns:1fr 1fr">
-<input id="gradHex1" value="#FF0000" maxlength="7">
-<input id="gradHex2" value="#00FF00" maxlength="7">
+<div style="display:flex; gap:10px;">
+  <div class="color-picker-trigger" id="grad1Trigger">
+    <div class="color-preview-box" id="grad1Preview" style="background: #FF0000;"></div>
+    <span class="color-hex-text" id="grad1HexText">#FF0000</span>
+  </div>
+  <div class="color-picker-trigger" id="grad2Trigger">
+    <div class="color-preview-box" id="grad2Preview" style="background: #00FF00;"></div>
+    <span class="color-hex-text" id="grad2HexText">#00FF00</span>
+  </div>
 </div>
 </div>
 
@@ -233,7 +320,6 @@ small{color:var(--muted)}
 <div class="preview-stage">
 <span class="preview-label">MINECRAFT TOOLTIP PREVIEW</span>
 
-<!-- Solo el cuadro de tooltip con el texto animado -->
 <div class="mc-single-tooltip">
   <div id="preview" class="preview-text"></div>
 </div>
@@ -247,9 +333,38 @@ small{color:var(--muted)}
 </div>
 </div>
 
+<!-- MODAL SELECTOR DE COLOR PERSONALIZADO -->
+<div class="modal-overlay" id="colorModal">
+  <div class="color-modal">
+    <div class="picker-stage">
+      <div class="color-map" id="colorMap">
+        <div class="color-pointer" id="colorPointer" style="left:50%; top:50%;"></div>
+      </div>
+      <div class="val-bar" id="valBar">
+        <div class="val-pointer" id="valPointer" style="top:0%;"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="modal-label">CÓDIGO HEX MANUAL</div>
+      <input type="text" class="hex-input-box" id="modalHexInput" value="#FA6D6D" maxlength="7">
+    </div>
+
+    <div>
+      <div class="modal-label">PREVISUALIZACIÓN DEL COLOR</div>
+      <div class="modal-preview-bar" id="modalPreviewBar" style="background:#FA6D6D"></div>
+    </div>
+
+    <button class="save-btn" id="modalSaveBtn">GUARDAR COLOR</button>
+  </div>
+</div>
+
 <script>
 const $=id=>document.getElementById(id);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+
+let activeColorTarget = null; // 'main', 'visual', 'grad1', 'grad2'
+let currentH = 0, currentS = 1, currentV = 1;
 
 function rgbFromHex(hex){
  hex=hex.trim().replace("#","");
@@ -259,16 +374,141 @@ function rgbFromHex(hex){
 
 function hexFromRgb(r,g,b){return "#"+[r,g,b].map(x=>clamp(Number(x)||0,0,255).toString(16).padStart(2,"0")).join("").toUpperCase()}
 
-function setMainHex(hex){
- const rgb=rgbFromHex(hex); if(!rgb)return;
- $("hex").value=hex.toUpperCase();
- ["r","g","b"].forEach((id,i)=>$(id).value=rgb[i]);$("color").value=hex;
+function hsvToRgb(h, s, v) {
+  let r, g, b;
+  let i = Math.floor(h * 6);
+  let f = h * 6 - i;
+  let p = v * (1 - s);
+  let q = v * (1 - f * s);
+  let t = v * (1 - (1 - f) * s);
+  switch (i % 6) {
+    case 0: r = v, g = t, b = p; break;
+    case 1: r = q, g = v, b = p; break;
+    case 2: r = p, g = v, b = t; break;
+    case 3: r = p, g = q, b = v; break;
+    case 4: r = t, g = p, b = v; break;
+    case 5: r = v, g = p, b = q; break;
+  }
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
 
-function setVisualHex(hex){
- const rgb=rgbFromHex(hex); if(!rgb)return;
- $("effectHex").value=hex.toUpperCase(); $("effectColor").value=hex;
+function rgbToHsv(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  let max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h, s, v = max;
+  let d = max - min;
+  s = max === 0 ? 0 : d / max;
+  if (max === min) {
+    h = 0;
+  } else {
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return [h, s, v];
 }
+
+// Lógica del Pop-up Modal de Color
+function openModal(target, initialHex) {
+  activeColorTarget = target;
+  const rgb = rgbFromHex(initialHex) || [255, 0, 0];
+  const [h, s, v] = rgbToHsv(rgb[0], rgb[1], rgb[2]);
+  currentH = h; currentS = s; currentV = v;
+
+  updateModalUI(hexFromRgb(rgb[0], rgb[1], rgb[2]));
+  $("colorModal").classList.add("active");
+}
+
+function closeModal() {
+  $("colorModal").classList.remove("active");
+}
+
+function updateModalUI(hex) {
+  $("modalHexInput").value = hex;
+  $("modalPreviewBar").style.background = hex;
+
+  $("colorPointer").style.left = (currentH * 100) + "%";
+  $("colorPointer").style.top = ((1 - currentS) * 100) + "%";
+  $("valPointer").style.top = ((1 - currentV) * 100) + "%";
+}
+
+// Dragging color map
+let isDraggingMap = false;
+let isDraggingVal = false;
+
+$("colorMap").addEventListener("mousedown", e => { isDraggingMap = true; handleMapMove(e); });
+$("valBar").addEventListener("mousedown", e => { isDraggingVal = true; handleValMove(e); });
+
+window.addEventListener("mousemove", e => {
+  if (isDraggingMap) handleMapMove(e);
+  if (isDraggingVal) handleValMove(e);
+});
+
+window.addEventListener("mouseup", () => { isDraggingMap = false; isDraggingVal = false; });
+
+function handleMapMove(e) {
+  const rect = $("colorMap").getBoundingClientRect();
+  let x = clamp(e.clientX - rect.left, 0, rect.width);
+  let y = clamp(e.clientY - rect.top, 0, rect.height);
+
+  currentH = x / rect.width;
+  currentS = 1 - (y / rect.height);
+
+  const [r, g, b] = hsvToRgb(currentH, currentS, currentV);
+  updateModalUI(hexFromRgb(r, g, b));
+}
+
+function handleValMove(e) {
+  const rect = $("valBar").getBoundingClientRect();
+  let y = clamp(e.clientY - rect.top, 0, rect.height);
+
+  currentV = 1 - (y / rect.height);
+
+  const [r, g, b] = hsvToRgb(currentH, currentS, currentV);
+  updateModalUI(hexFromRgb(r, g, b));
+}
+
+$("modalHexInput").addEventListener("input", e => {
+  const hex = e.target.value;
+  const rgb = rgbFromHex(hex);
+  if (rgb) {
+    const [h, s, v] = rgbToHsv(rgb[0], rgb[1], rgb[2]);
+    currentH = h; currentS = s; currentV = v;
+    updateModalUI(hex.toUpperCase());
+  }
+});
+
+$("modalSaveBtn").onclick = () => {
+  const hex = $("modalHexInput").value;
+  const rgb = rgbFromHex(hex);
+  if (!rgb) return;
+
+  if (activeColorTarget === 'main') {
+    $("mainColorPreview").style.background = hex;
+    $("mainHexText").textContent = hex;
+    ["r","g","b"].forEach((id,i)=>$(id).value=rgb[i]);
+  } else if (activeColorTarget === 'visual') {
+    $("visualColorPreview").style.background = hex;
+    $("visualHexText").textContent = hex;
+  } else if (activeColorTarget === 'grad1') {
+    $("grad1Preview").style.background = hex;
+    $("grad1HexText").textContent = hex;
+  } else if (activeColorTarget === 'grad2') {
+    $("grad2Preview").style.background = hex;
+    $("grad2HexText").textContent = hex;
+  }
+
+  closeModal();
+  update();
+};
+
+$("mainColorTrigger").onclick = () => openModal('main', $("mainHexText").textContent);
+$("visualColorTrigger").onclick = () => openModal('visual', $("visualHexText").textContent);
+$("grad1Trigger").onclick = () => openModal('grad1', $("grad1HexText").textContent);
+$("grad2Trigger").onclick = () => openModal('grad2', $("grad2HexText").textContent);
 
 function interpolateColor(c1, c2, factor) {
   const r = Math.round(c1[0] + factor * (c2[0] - c1[0]));
@@ -279,7 +519,7 @@ function interpolateColor(c1, c2, factor) {
 
 function update(){
  const effect=$("effect").value;
- const visual=$("effectColor").value;
+ const visual=$("visualHexText").textContent;
  const p=Number($("param").value);
  const duration=Math.max(0.2,Number($("duration").value));
  $("paramValue").textContent=p.toFixed(1);
@@ -291,8 +531,8 @@ function update(){
 
  const dur = Math.max(0.5, 3/p);
  const isGrad = effect === "gradient" || effect === "dynamic_gradient";
- const c1 = rgbFromHex($("grad1").value) || [255,0,0];
- const c2 = rgbFromHex($("grad2").value) || [0,255,0];
+ const c1 = rgbFromHex($("grad1HexText").textContent) || [255,0,0];
+ const c2 = rgbFromHex($("grad2HexText").textContent) || [0,255,0];
 
  text.split("").forEach((char, i) => {
    const span = document.createElement("span");
@@ -359,34 +599,40 @@ function update(){
  const label=effect==="wavy_rainbow"?"Wavy + Rainbow":
              effect==="bouncy_rainbow"?"Bouncy + Rainbow":
              effect.replaceAll("_"," ");
- $("output").textContent=`// ${label} (${ $("hex").value.toUpperCase() })\n${macro}(${id}) {\n${body}\n}`;
+ $("output").textContent=`// ${label} (${ $("mainHexText").textContent.toUpperCase() })\n${macro}(${id}) {\n${body}\n}`;
 }
 
-function visualRgb(){return rgbFromHex($("effectColor").value).join(", ")}
-function gradRgb(n){return rgbFromHex($("grad"+n).value).join(", ")}
-function syncGradientHex(n){
- const h=$("gradHex"+n).value.trim(); const rgb=rgbFromHex(h); if(rgb)$("grad"+n).value=h;
- update();
-}
+function visualRgb(){return rgbFromHex($("visualHexText").textContent).join(", ")}
+function gradRgb(n){return rgbFromHex($("grad"+n+"HexText").textContent).join(", ")}
 
-$("color").addEventListener("input",e=>{setMainHex(e.target.value);update()});
-$("hex").addEventListener("input",e=>{const r=rgbFromHex(e.target.value);if(r){$("color").value=e.target.value;["r","g","b"].forEach((x,i)=>$(x).value=r[i]);update()}});
-["r","g","b"].forEach((id,i)=>$(id).addEventListener("input",()=>{const h=hexFromRgb($("r").value,$("g").value,$("b").value);$("hex").value=h;$("color").value=h;update()}));
-$("effectColor").addEventListener("input",e=>{setVisualHex(e.target.value);update()});
-$("effectHex").addEventListener("input",e=>{const r=rgbFromHex(e.target.value);if(r){$("effectColor").value=e.target.value;update()}});
-["grad1","grad2"].forEach((id,i)=>$(id).addEventListener("input",()=>{$("gradHex"+(i+1)).value=$("grad"+(i+1)).value.toUpperCase();update()}));
-["gradHex1","gradHex2"].forEach((id,i)=>$(id).addEventListener("input",()=>syncGradientHex(i+1)));
+["r","g","b"].forEach((id,i)=>$(id).addEventListener("input",()=>{
+  const h=hexFromRgb($("r").value,$("g").value,$("b").value);
+  $("mainHexText").textContent=h;
+  $("mainColorPreview").style.background=h;
+  update();
+}));
+
 ["effect","param","duration","shadow","sampleText"].forEach(id=>$(id).addEventListener("input",update));
-$("random").onclick=()=>{const h=hexFromRgb(Math.random()*256,Math.random()*256,Math.random()*256);setMainHex(h);update()};
+
+$("random").onclick=()=>{
+  const h=hexFromRgb(Math.random()*256,Math.random()*256,Math.random()*256);
+  $("mainHexText").textContent=h;
+  $("mainColorPreview").style.background=h;
+  const rgb=rgbFromHex(h);
+  ["r","g","b"].forEach((x,i)=>$(x).value=rgb[i]);
+  update();
+};
 
 function copy(){navigator.clipboard.writeText($("output").textContent);$("copy").textContent="¡Copiado!";$("copy2").textContent="¡Copiado!";setTimeout(()=>{$("copy").textContent="Copiar código";$("copy2").textContent="Copiar configuración"},1200)}
 $("copy").onclick=copy;$("copy2").onclick=copy;
 $("reset").onclick=()=>{location.reload()};
+
 $("effect").addEventListener("change",()=>{
  const isGradient=["gradient","dynamic_gradient"].includes($("effect").value);
  $("gradientFields").style.display=isGradient?"block":"none";
  update();
 });
+
 $("gradientFields").style.display=["gradient","dynamic_gradient"].includes($("effect").value)?"block":"none";
 update();
 </script>
