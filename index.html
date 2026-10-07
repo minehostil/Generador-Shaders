@@ -20,8 +20,8 @@ h1{font-size:clamp(28px,5vw,48px);margin:0 0 8px;font-weight:800;letter-spacing:
 .panel h2{font-size:16px;margin:0 0 18px}
 .field{margin-bottom:18px}
 label{display:block;font-size:12px;font-weight:700;color:#aab5c7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
-input[type=text],input[type=number],select{width:100%;border:1px solid var(--border);background:#0b1018;color:var(--text);border-radius:10px;padding:11px 12px;outline:none}
-input:focus,select:focus{border-color:#27f580}
+input[type=text],input[type=number]{width:100%;border:1px solid var(--border);background:#0b1018;color:var(--text);border-radius:10px;padding:11px 12px;outline:none}
+input:focus{border-color:#27f580}
 
 .effect-trigger {
   width: 100%; padding: 12px 14px; background: #0b1018; border: 1px solid var(--border);
@@ -257,19 +257,13 @@ small{color:var(--muted)}
 </div>
 </div>
 
-<!-- SELECTOR DE DIRECCIÓN DEL SHADER DE GRADIENTE -->
+<!-- TRIGGER DE DIRECCIÓN CON MODO POPUP SMOOTH -->
 <div class="field" id="directionField" style="display:none">
 <label>Dirección del Gradiente (Direction)</label>
-<select id="gradientDirection">
-  <option value="0.0">0: Arriba (↑)</option>
-  <option value="1.0">1: Diagonal Arriba-Derecha (↗)</option>
-  <option value="2.0" selected>2: Derecha / Horizontal (→)</option>
-  <option value="3.0">3: Diagonal Abajo-Derecha (↘)</option>
-  <option value="4.0">4: Abajo / Vertical (↓)</option>
-  <option value="5.0">5: Diagonal Abajo-Izquierda (↙)</option>
-  <option value="6.0">6: Izquierda (←)</option>
-  <option value="7.0">7: Diagonal Arriba-Izquierda (↖)</option>
-</select>
+<div class="effect-trigger" id="directionTrigger">
+  <span id="selectedDirectionLabel">2: Derecha / Horizontal (→)</span>
+  <span class="arrow">▲</span>
+</div>
 </div>
 
 <div class="field">
@@ -379,6 +373,31 @@ small{color:var(--muted)}
   </div>
 </div>
 
+<!-- POPUP SELECCIÓN DE DIRECCIÓN DEL GRADIENTE -->
+<div class="modal-overlay" id="directionModal">
+  <div class="effects-modal">
+    <div class="modal-header-title">
+      <span>DIRECCIÓN DEL GRADIENTE</span>
+      <button class="modal-close-btn" id="closeDirectionModal">✕</button>
+    </div>
+    <div class="effects-list">
+      <div>
+        <div class="effect-group-label">Orientaciones</div>
+        <div class="effect-options-grid">
+          <div class="direction-item" data-value="0.0" data-label="0: Arriba (↑)">0: Arriba (↑)</div>
+          <div class="direction-item" data-value="1.0" data-label="1: Diag. Arriba-Der (↗)">1: Diag. Arriba-Der (↗)</div>
+          <div class="direction-item selected" data-value="2.0" data-label="2: Derecha / Horiz. (→)">2: Derecha / Horiz. (→)</div>
+          <div class="direction-item" data-value="3.0" data-label="3: Diag. Abajo-Der (↘)">3: Diag. Abajo-Der (↘)</div>
+          <div class="direction-item" data-value="4.0" data-label="4: Abajo / Vert. (↓)">4: Abajo / Vert. (↓)</div>
+          <div class="direction-item" data-value="5.0" data-label="5: Diag. Abajo-Izq (↙)">5: Diag. Abajo-Izq (↙)</div>
+          <div class="direction-item" data-value="6.0" data-label="6: Izquierda (←)">6: Izquierda (←)</div>
+          <div class="direction-item" data-value="7.0" data-label="7: Diag. Arriba-Izq (↖)">7: Diag. Arriba-Izq (↖)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL SELECTOR DE COLOR -->
 <div class="modal-overlay" id="colorModal">
   <div class="color-modal">
@@ -410,6 +429,7 @@ const $=id=>document.getElementById(id);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 
 let currentEffect = "dynamic_gradient";
+let currentDirection = "2.0";
 let activeColorTarget = null;
 let currentH = 0, currentS = 1, currentV = 1;
 
@@ -439,6 +459,36 @@ document.querySelectorAll(".effect-item").forEach(item => {
     $("selectedEffectLabel").textContent = item.dataset.label;
     
     closeEffects();
+    update();
+  };
+});
+
+// POPUP DE DIRECCIÓN DEL GRADIENTE
+const directionModal = $("directionModal");
+const directionTrigger = $("directionTrigger");
+
+directionTrigger.onclick = () => {
+  document.body.classList.add("modal-open");
+  directionModal.classList.add("active");
+};
+
+const closeDirection = () => {
+  document.body.classList.remove("modal-open");
+  directionModal.classList.remove("active");
+};
+
+$("closeDirectionModal").onclick = closeDirection;
+directionModal.onclick = (e) => { if (e.target === directionModal) closeDirection(); };
+
+document.querySelectorAll(".direction-item").forEach(item => {
+  item.onclick = () => {
+    document.querySelectorAll(".direction-item").forEach(el => el.classList.remove("selected"));
+    item.classList.add("selected");
+    
+    currentDirection = item.dataset.value;
+    $("selectedDirectionLabel").textContent = item.dataset.label;
+    
+    closeDirection();
     update();
   };
 });
@@ -629,7 +679,7 @@ function update(){
 
  const c1Hex = $("grad1HexText").textContent;
  const c2Hex = $("grad2HexText").textContent;
- const dirVal = $("gradientDirection").value;
+ const dirVal = currentDirection;
 
  if (effect === "dynamic_gradient") {
    const container = document.createElement("span");
@@ -727,7 +777,7 @@ function gradRgb(n){return rgbFromHex($("grad"+n+"HexText").textContent).join(",
   update();
 }));
 
-["param","duration","shadow","sampleText","gradientDirection"].forEach(id=>$(id).addEventListener("input",update));
+["param","duration","shadow","sampleText"].forEach(id=>$(id).addEventListener("input",update));
 
 $("random").onclick=()=>{
   const h=hexFromRgb(Math.random()*256,Math.random()*256,Math.random()*256);
