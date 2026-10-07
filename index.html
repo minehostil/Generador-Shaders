@@ -20,8 +20,36 @@ h1{font-size:clamp(28px,5vw,48px);margin:0 0 8px;font-weight:800;letter-spacing:
 .panel h2{font-size:16px;margin:0 0 18px}
 .field{margin-bottom:18px}
 label{display:block;font-size:12px;font-weight:700;color:#aab5c7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
-select,input[type=text],input[type=number]{width:100%;border:1px solid var(--border);background:#0b1018;color:var(--text);border-radius:10px;padding:11px 12px;outline:none}
-select:focus,input:focus{border-color:#27f580}
+input[type=text],input[type=number]{width:100%;border:1px solid var(--border);background:#0b1018;color:var(--text);border-radius:10px;padding:11px 12px;outline:none}
+input:focus{border-color:#27f580}
+
+/* TRIGGER DEL SELECTOR DE EFECTOS (DESPLEGABLE SMOOTH) */
+.effect-trigger {
+  width: 100%;
+  padding: 12px 14px;
+  background: #0b1018;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: border-color 0.25s ease, transform 0.15s ease, background-color 0.25s ease;
+}
+.effect-trigger:hover {
+  border-color: var(--accent);
+  background: #111824;
+}
+.effect-trigger:active {
+  transform: scale(0.98);
+}
+.effect-trigger .arrow {
+  font-size: 10px;
+  color: var(--muted);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 
 .color-picker-trigger {
   width: 100%;
@@ -91,87 +119,120 @@ button:hover{filter:brightness(1.08)}
 .code pre{margin:0;background:#080c12;border:1px solid var(--border);border-radius:12px;padding:15px;overflow:auto;color:#c9f8da;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}
 .code-actions{display:flex;justify-content:flex-end;margin-top:8px}
 
-/* MODAL DE COLOR PROFESIONAL (Evita scroll en el fondo) */
+/* MODALES BASE (SMOOTH ANIMATIONS) */
 .modal-overlay {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(6px);
+  background: rgba(4, 6, 12, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex; align-items: center; justify-content: center;
-  z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
-  touch-action: none;
-  overscroll-behavior: contain;
+  z-index: 9999; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  touch-action: none; overscroll-behavior: contain;
 }
 .modal-overlay.active { opacity: 1; pointer-events: auto; }
 
-.color-modal {
-  background: #1d1b3a;
-  border: 2px solid #3b376d;
+/* POPUP DE EFECTOS SMART & SMOOTH */
+.effects-modal {
+  background: rgba(16, 21, 31, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
-  width: 340px;
+  width: min(440px, 90vw);
+  max-height: 80vh;
   padding: 20px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-  display: flex; flex-direction: column; gap: 14px;
-  user-select: none;
-  touch-action: none;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.1);
+  display: flex; flex-direction: column;
+  transform: scale(0.92) translateY(15px);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-overlay.active .effects-modal {
+  transform: scale(1) translateY(0);
 }
 
-.picker-stage {
-  display: flex; gap: 12px; height: 160px;
+.modal-header-title {
+  font-size: 16px; font-weight: 800; color: #fff;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+.modal-close-btn {
+  background: rgba(255,255,255,0.06); border: none; color: var(--muted);
+  width: 28px; height: 28px; border-radius: 50%; display: flex;
+  align-items: center; justify-content: center; cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.modal-close-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+.effects-list {
+  overflow-y: auto; display: flex; flex-direction: column; gap: 14px;
+  padding-right: 6px;
+}
+.effects-list::-webkit-scrollbar { width: 5px; }
+.effects-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+.effect-group-label {
+  font-size: 11px; font-weight: 800; color: var(--accent);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;
+}
+.effect-options-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px;
+}
+.effect-item {
+  background: #0b1018; border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 12px; font-size: 13px; font-weight: 600; color: #c3cbda;
+  cursor: pointer; text-align: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.effect-item:hover {
+  background: #151d2a; border-color: rgba(39, 245, 128, 0.4); color: #fff; transform: translateY(-2px);
+}
+.effect-item.selected {
+  background: rgba(39, 245, 128, 0.12); border-color: var(--accent); color: var(--accent); font-weight: 800;
 }
 
-/* Mapa de Saturación / Brillo con tono puro dinámico */
+/* POPUP COLOR PICKER */
+.color-modal {
+  background: #1d1b3a; border: 2px solid #3b376d; border-radius: 20px;
+  width: 340px; padding: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  display: flex; flex-direction: column; gap: 14px; user-select: none; touch-action: none;
+  transform: scale(0.92) translateY(15px); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-overlay.active .color-modal { transform: scale(1) translateY(0); }
+
+.picker-stage { display: flex; gap: 12px; height: 160px; }
 .color-map {
   flex: 1; height: 100%; border-radius: 10px; position: relative; cursor: crosshair;
   background-color: #f00;
-  background-image: 
-    linear-gradient(to top, #000, transparent),
-    linear-gradient(to right, #fff, transparent);
+  background-image: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent);
   touch-action: none;
 }
-
 .color-pointer {
   width: 16px; height: 16px; border: 2px solid #fff; border-radius: 50%;
   position: absolute; transform: translate(-50%, -50%);
   box-shadow: 0 0 4px rgba(0,0,0,0.8); pointer-events: none;
 }
-
-/* Barra Vertical de Tonos (Hue Slider) */
 .hue-bar {
   width: 24px; height: 100%; border-radius: 8px; position: relative; cursor: pointer;
-  background: linear-gradient(to bottom, 
-    #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+  background: linear-gradient(to bottom, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
   touch-action: none;
 }
-
 .hue-pointer {
   width: 18px; height: 18px; border: 2px solid #fff; border-radius: 50%;
   position: absolute; left: 50%; transform: translate(-50%, -50%);
   box-shadow: 0 0 4px rgba(0,0,0,0.8); pointer-events: none;
 }
-
 .modal-label {
   text-align: center; font-size: 11px; font-weight: 700; color: #a4a1cb;
   letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 4px;
 }
-
 .hex-input-box {
-  background: #121026; border-radius: 10px; padding: 10px;
-  text-align: center; font-family: monospace; font-size: 16px;
-  color: #fff; border: 1px solid #3b376d; width: 100%; outline: none;
+  background: #121026; border-radius: 10px; padding: 10px; text-align: center;
+  font-family: monospace; font-size: 16px; color: #fff; border: 1px solid #3b376d; width: 100%; outline: none;
 }
-
-.modal-preview-bar {
-  height: 36px; border-radius: 10px; width: 100%; border: 1px solid rgba(255,255,255,0.1);
-}
-
-.save-btn {
-  background: #a29bfe; color: #121026; font-weight: 800;
-  padding: 12px; border-radius: 12px; text-align: center;
-  cursor: pointer; border: none; font-size: 14px;
-}
+.modal-preview-bar { height: 36px; border-radius: 10px; width: 100%; border: 1px solid rgba(255,255,255,0.1); }
+.save-btn { background: #a29bfe; color: #121026; font-weight: 800; padding: 12px; border-radius: 12px; text-align: center; cursor: pointer; border: none; font-size: 14px; }
 .save-btn:hover { background: #b8b2ff; }
 
-/* Animaciones */
+/* ANIMACIONES MINECRAFT */
 @keyframes shake{0%,100%{transform:translate(0)}25%{transform:translate(-1px,1px)}50%{transform:translate(1px,-1px)}75%{transform:translate(-1px,-1px)}}
 @keyframes wavy{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @keyframes bounce{0%,100%{transform:translateY(0)}45%{transform:translateY(-8px)}65%{transform:translateY(-2px)}}
@@ -183,15 +244,7 @@ button:hover{filter:brightness(1.08)}
 @keyframes jump{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @keyframes glitch{0%,100%{text-shadow:2px 0 #f00,-2px 0 #0ff}20%{transform:translate(-2px)}40%{transform:translate(2px)}60%{text-shadow:-2px 0 #f00,2px 0 #0ff}}
 @keyframes lava{0%,100%{filter:brightness(1)}50%{filter:brightness(1.5) saturate(1.5)}}
-@keyframes rainbow{
-  0% { color: #ff0000; }
-  17% { color: #ff8800; }
-  33% { color: #ffff00; }
-  50% { color: #00ff00; }
-  67% { color: #00ffff; }
-  83% { color: #0088ff; }
-  100% { color: #ff00ff; }
-}
+@keyframes rainbow{ 0%{color:#ff0000} 17%{color:#ff8800} 33%{color:#ffff00} 50%{color:#00ff00} 67%{color:#00ffff} 83%{color:#0088ff} 100%{color:#ff00ff} }
 
 .effect-shake{animation:shake .25s infinite}
 .effect-wavy{animation:wavy 1s ease-in-out infinite}
@@ -226,40 +279,13 @@ small{color:var(--muted)}
 <input id="sampleText" type="text" value="Hola MineHostil">
 </div>
 
+<!-- SELECTOR DE EFECTOS MEJORADO -->
 <div class="field">
 <label>Efecto</label>
-<select id="effect">
-<optgroup label="Efectos básicos">
-<option value="rainbow" selected>Rainbow</option>
-<option value="shake">Shake</option>
-<option value="wavy">Wavy</option>
-<option value="bouncy">Bouncy</option>
-<option value="blinking">Blinking</option>
-<option value="pulse">Pulse</option>
-</optgroup>
-<optgroup label="Movimiento">
-<option value="spin">Spin</option>
-<option value="sequential_spin">Sequential Spin</option>
-<option value="fade">Fade</option>
-<option value="iterating">Iterating Jump</option>
-</optgroup>
-<optgroup label="Especiales">
-<option value="glitch">Glitch</option>
-<option value="lava">Lava</option>
-</optgroup>
-<optgroup label="Combinaciones">
-<option value="wavy_rainbow">Wavy + Rainbow</option>
-<option value="bouncy_rainbow">Bouncy + Rainbow</option>
-</optgroup>
-<optgroup label="Transformaciones">
-<option value="scale">Scale x1.5</option>
-<option value="offset">Offset Up</option>
-</optgroup>
-<optgroup label="Gradientes">
-<option value="gradient">Gradient</option>
-<option value="dynamic_gradient">Dynamic Gradient</option>
-</optgroup>
-</select>
+<div class="effect-trigger" id="effectTrigger">
+  <span id="selectedEffectLabel">Rainbow</span>
+  <span class="arrow">▲</span>
+</div>
 </div>
 
 <div class="field">
@@ -344,6 +370,66 @@ small{color:var(--muted)}
 </div>
 </div>
 
+<!-- POPUP SMOOTH PARA SELECCIÓN DE EFECTOS -->
+<div class="modal-overlay" id="effectsModal">
+  <div class="effects-modal">
+    <div class="modal-header-title">
+      <span>SELECCIONAR EFECTO</span>
+      <button class="modal-close-btn" id="closeEffectsModal">✕</button>
+    </div>
+    <div class="effects-list">
+      <div>
+        <div class="effect-group-label">Efectos Básicos</div>
+        <div class="effect-options-grid">
+          <div class="effect-item selected" data-value="rainbow" data-label="Rainbow">Rainbow</div>
+          <div class="effect-item" data-value="shake" data-label="Shake">Shake</div>
+          <div class="effect-item" data-value="wavy" data-label="Wavy">Wavy</div>
+          <div class="effect-item" data-value="bouncy" data-label="Bouncy">Bouncy</div>
+          <div class="effect-item" data-value="blinking" data-label="Blinking">Blinking</div>
+          <div class="effect-item" data-value="pulse" data-label="Pulse">Pulse</div>
+        </div>
+      </div>
+      <div>
+        <div class="effect-group-label">Movimiento</div>
+        <div class="effect-options-grid">
+          <div class="effect-item" data-value="spin" data-label="Spin">Spin</div>
+          <div class="effect-item" data-value="sequential_spin" data-label="Sequential Spin">Sequential Spin</div>
+          <div class="effect-item" data-value="fade" data-label="Fade">Fade</div>
+          <div class="effect-item" data-value="iterating" data-label="Iterating Jump">Iterating Jump</div>
+        </div>
+      </div>
+      <div>
+        <div class="effect-group-label">Especiales</div>
+        <div class="effect-options-grid">
+          <div class="effect-item" data-value="glitch" data-label="Glitch">Glitch</div>
+          <div class="effect-item" data-value="lava" data-label="Lava">Lava</div>
+        </div>
+      </div>
+      <div>
+        <div class="effect-group-label">Combinaciones</div>
+        <div class="effect-options-grid">
+          <div class="effect-item" data-value="wavy_rainbow" data-label="Wavy + Rainbow">Wavy + Rainbow</div>
+          <div class="effect-item" data-value="bouncy_rainbow" data-label="Bouncy + Rainbow">Bouncy + Rainbow</div>
+        </div>
+      </div>
+      <div>
+        <div class="effect-group-label">Transformaciones</div>
+        <div class="effect-options-grid">
+          <div class="effect-item" data-value="scale" data-label="Scale x1.5">Scale x1.5</div>
+          <div class="effect-item" data-value="offset" data-label="Offset Up">Offset Up</div>
+        </div>
+      </div>
+      <div>
+        <div class="effect-group-label">Gradientes</div>
+        <div class="effect-options-grid">
+          <div class="effect-item" data-value="gradient" data-label="Gradient">Gradient</div>
+          <div class="effect-item" data-value="dynamic_gradient" data-label="Dynamic Gradient">Dynamic Gradient</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL SELECTOR DE COLOR -->
 <div class="modal-overlay" id="colorModal">
   <div class="color-modal">
@@ -374,9 +460,44 @@ small{color:var(--muted)}
 const $=id=>document.getElementById(id);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 
+let currentEffect = "rainbow";
 let activeColorTarget = null;
 let currentH = 0, currentS = 1, currentV = 1;
 
+// CONTROL DEL POPUP DE EFECTOS
+const effectsModal = $("effectsModal");
+const effectTrigger = $("effectTrigger");
+
+effectTrigger.onclick = () => {
+  document.body.classList.add("modal-open");
+  effectsModal.classList.add("active");
+};
+
+const closeEffects = () => {
+  document.body.classList.remove("modal-open");
+  effectsModal.classList.remove("active");
+};
+
+$("closeEffectsModal").onclick = closeEffects;
+effectsModal.onclick = (e) => { if (e.target === effectsModal) closeEffects(); };
+
+document.querySelectorAll(".effect-item").forEach(item => {
+  item.onclick = () => {
+    document.querySelectorAll(".effect-item").forEach(el => el.classList.remove("selected"));
+    item.classList.add("selected");
+    
+    currentEffect = item.dataset.value;
+    $("selectedEffectLabel").textContent = item.dataset.label;
+    
+    const isGradient = ["gradient", "dynamic_gradient"].includes(currentEffect);
+    $("gradientFields").style.display = isGradient ? "block" : "none";
+    
+    closeEffects();
+    update();
+  };
+});
+
+// PICKER DE COLOR Y CONVERSIONES
 function rgbFromHex(hex){
  hex=hex.trim().replace("#","");
  if(!/^[0-9a-fA-F]{6}$/.test(hex)) return null;
@@ -438,15 +559,15 @@ function closeModal() {
   $("colorModal").classList.remove("active");
 }
 
+$("colorModal").onclick = (e) => { if (e.target === $("colorModal")) closeModal(); };
+
 function updateModalUI(hex) {
   $("modalHexInput").value = hex;
   $("modalPreviewBar").style.background = hex;
 
-  // Actualiza el fondo puro de la caja del mapa según el tono (Hue)
   const pureRgb = hsvToRgb(currentH, 1, 1);
   $("colorMap").style.backgroundColor = `rgb(${pureRgb[0]},${pureRgb[1]},${pureRgb[2]})`;
 
-  // Punteros
   $("colorPointer").style.left = (currentS * 100) + "%";
   $("colorPointer").style.top = ((1 - currentV) * 100) + "%";
   $("huePointer").style.top = (currentH * 100) + "%";
@@ -484,11 +605,9 @@ function handleHueMove(e) {
   updateModalUI(hexFromRgb(r, g, b));
 }
 
-// Eventos del Mouse
 $("colorMap").addEventListener("mousedown", e => { isDraggingMap = true; handleMapMove(e); });
 $("hueBar").addEventListener("mousedown", e => { isDraggingHue = true; handleHueMove(e); });
 
-// Eventos Táctiles con preventDefault para evitar desplazar el sitio web de fondo
 $("colorMap").addEventListener("touchstart", e => { isDraggingMap = true; handleMapMove(e); }, {passive: false});
 $("hueBar").addEventListener("touchstart", e => { isDraggingHue = true; handleHueMove(e); }, {passive: false});
 
@@ -552,12 +671,12 @@ function interpolateColor(c1, c2, factor) {
 }
 
 function update(){
- const effect=$("effect").value;
- const visual=$("visualHexText").textContent;
- const p=Number($("param").value);
- const duration=Math.max(0.2,Number($("duration").value));
- $("paramValue").textContent=p.toFixed(1);
- $("durationValue").textContent=duration.toFixed(1)+"s";
+ const effect = currentEffect;
+ const visual = $("visualHexText").textContent;
+ const p = Number($("param").value);
+ const duration = Math.max(0.2, Number($("duration").value));
+ $("paramValue").textContent = p.toFixed(1);
+ $("durationValue").textContent = duration.toFixed(1) + "s";
 
  const text = $("sampleText").value || "Hola MineHostil";
  const preview = $("preview");
@@ -605,11 +724,11 @@ function update(){
    preview.appendChild(span);
  });
 
- const rgb=[$("r").value,$("g").value,$("b").value];
- const id=`${rgb[0]}, ${rgb[1]}, ${rgb[2]}`;
- let body="";
- const shadow=$("shadow").checked;
- const macro=shadow?"TEXT_EFFECT_WITH_SHADOW":"TEXT_EFFECT";
+ const rgb = [$("r").value, $("g").value, $("b").value];
+ const id = `${rgb[0]}, ${rgb[1]}, ${rgb[2]}`;
+ let body = "";
+ const shadow = $("shadow").checked;
+ const macro = shadow ? "TEXT_EFFECT_WITH_SHADOW" : "TEXT_EFFECT";
 
  if(effect==="shake") body=`    apply_shake();\n    apply_color(rgb(${visualRgb()}));`;
  else if(effect==="wavy") body=`    apply_wavy();\n    apply_color(rgb(${visualRgb()}));`;
@@ -630,9 +749,7 @@ function update(){
  else if(effect==="gradient") body=`    apply_gradient(rgb(${gradRgb(1)}), rgb(${gradRgb(2)}), ${p.toFixed(1)});`;
  else if(effect==="dynamic_gradient") body=`    apply_dynamic_gradient(rgb(${gradRgb(1)}), rgb(${gradRgb(2)}), ${p.toFixed(1)}, 500.0);`;
 
- const label=effect==="wavy_rainbow"?"Wavy + Rainbow":
-             effect==="bouncy_rainbow"?"Bouncy + Rainbow":
-             effect.replaceAll("_"," ");
+ const label = $("selectedEffectLabel").textContent;
  $("output").textContent=`// ${label} (${ $("mainHexText").textContent.toUpperCase() })\n${macro}(${id}) {\n${body}\n}`;
 }
 
@@ -646,7 +763,7 @@ function gradRgb(n){return rgbFromHex($("grad"+n+"HexText").textContent).join(",
   update();
 }));
 
-["effect","param","duration","shadow","sampleText"].forEach(id=>$(id).addEventListener("input",update));
+["param","duration","shadow","sampleText"].forEach(id=>$(id).addEventListener("input",update));
 
 $("random").onclick=()=>{
   const h=hexFromRgb(Math.random()*256,Math.random()*256,Math.random()*256);
@@ -661,13 +778,6 @@ function copy(){navigator.clipboard.writeText($("output").textContent);$("copy")
 $("copy").onclick=copy;$("copy2").onclick=copy;
 $("reset").onclick=()=>{location.reload()};
 
-$("effect").addEventListener("change",()=>{
- const isGradient=["gradient","dynamic_gradient"].includes($("effect").value);
- $("gradientFields").style.display=isGradient?"block":"none";
- update();
-});
-
-$("gradientFields").style.display=["gradient","dynamic_gradient"].includes($("effect").value)?"block":"none";
 update();
 </script>
 </body>
