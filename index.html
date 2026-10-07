@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Effects Generator</title>
+<style>
+:root{--bg:#080b12;--panel:#10151f;--panel2:#151c28;--border:#273244;--text:#f4f7fb;--muted:#8995a8;--accent:#27f580}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 50% -10%,#15242b 0,#080b12 45%);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+.container{width:min(1180px,94%);margin:0 auto;padding:38px 0 60px}
+header{text-align:center;margin-bottom:30px}
+h1{font-size:clamp(28px,5vw,48px);margin:0 0 8px;font-weight:800;letter-spacing:-1px}
+.subtitle{color:var(--muted);margin:0}
+.layout{display:grid;grid-template-columns:390px 1fr;gap:20px}
+.panel{background:linear-gradient(180deg,rgba(21,28,40,.96),rgba(12,17,25,.96));border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.28)}
+.panel h2{font-size:16px;margin:0 0 18px}
+.field{margin-bottom:18px}
+label{display:block;font-size:12px;font-weight:700;color:#aab5c7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+select,input[type=text],input[type=number]{width:100%;border:1px solid var(--border);background:#0b1018;color:var(--text);border-radius:10px;padding:11px 12px;outline:none}
+select:focus,input:focus{border-color:#27f580}
+.color-row{display:flex;gap:10px}
+input[type=color]{width:54px;height:42px;padding:3px;background:#0b1018;border:1px solid var(--border);border-radius:10px;cursor:pointer}
+.hex{flex:1}
+.rgb{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:9px}
+.range-line{display:flex;align-items:center;gap:10px}
+input[type=range]{width:100%;accent-color:#27f580}
+.value{min-width:58px;text-align:right;color:#27f580;font-family:monospace}
+.check{display:flex;align-items:center;gap:9px;color:#b9c3d2;font-size:14px}
+.check input{accent-color:#27f580}
+button{border:0;border-radius:10px;padding:11px 14px;background:#27f580;color:#06110a;font-weight:800;cursor:pointer}
+button.secondary{background:#202a39;color:#e9eef6}
+button:hover{filter:brightness(1.08)}
+.actions{display:flex;gap:9px;flex-wrap:wrap}
+.preview{min-height:430px;display:flex;flex-direction:column}
+.preview-stage{flex:1;min-height:330px;border-radius:14px;border:1px dashed #344052;background:
+linear-gradient(45deg,#111720 25%,transparent 25%) 0 0/24px 24px,
+linear-gradient(-45deg,#111720 25%,transparent 25%) 0 0/24px 24px,
+linear-gradient(45deg,transparent 75%,#111720 75%) 0 0/24px 24px,
+linear-gradient(-45deg,transparent 75%,#111720 75%) 0 0/24px 24px,#0c1119;
+display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.preview-text{font-size:clamp(35px,7vw,82px);font-weight:900;letter-spacing:1px;position:relative;text-align:center;white-space:nowrap}
+.preview-label{position:absolute;left:15px;top:12px;font-size:11px;color:#68758a;font-family:monospace}
+.code{margin-top:18px}
+.code pre{margin:0;background:#080c12;border:1px solid var(--border);border-radius:12px;padding:15px;overflow:auto;color:#c9f8da;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}
+.code-actions{display:flex;justify-content:flex-end;margin-top:8px}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.swatch{width:28px;height:28px;border-radius:7px;border:1px solid rgba(255,255,255,.2);cursor:pointer}
+@keyframes shake{0%,100%{transform:translate(0)}25%{transform:translate(-4px,2px)}50%{transform:translate(4px,-2px)}75%{transform:translate(-2px,-3px)}}
+@keyframes wavy{0%,100%{transform:translateY(0)}50%{transform:translateY(-13px)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}45%{transform:translateY(-24px)}65%{transform:translateY(-7px)}}
+@keyframes blink{0%,45%{opacity:1}50%,100%{opacity:.12}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.13);opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes seqspin{0%{transform:rotate(0)}45%{transform:rotate(360deg)}100%{transform:rotate(360deg)}}
+@keyframes fade{0%,100%{opacity:.2}50%{opacity:1}}
+@keyframes jump{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+@keyframes glitch{0%,100%{text-shadow:2px 0 #f00,-2px 0 #0ff}20%{transform:translate(-2px)}40%{transform:translate(2px)}60%{text-shadow:-3px 0 #f00,3px 0 #0ff}}
+@keyframes lava{0%,100%{filter:brightness(1)}50%{filter:brightness(1.45) saturate(1.4)}}
+@keyframes rainbow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
+.effect-shake{animation:shake .25s infinite}
+.effect-wavy{animation:wavy 1s ease-in-out infinite}
+.effect-bouncy{animation:bounce .9s ease-in-out infinite}
+.effect-blinking{animation:blink 1s steps(1) infinite}
+.effect-pulse{animation:pulse 1.2s ease-in-out infinite}
+.effect-spin{animation:spin 2s linear infinite}
+.effect-sequential_spin{animation:seqspin 2.4s ease-in-out infinite}
+.effect-fade{animation:fade 1.4s ease-in-out infinite}
+.effect-iterating{animation:jump 1s ease-in-out infinite}
+.effect-glitch{animation:glitch .35s infinite}
+.effect-lava{animation:lava .8s ease-in-out infinite}
+.effect-rainbow{animation:rainbow 2s linear infinite}
+.effect-wavy.effect-rainbow{animation:wavy 1s ease-in-out infinite,rainbow 2s linear infinite}
+.effect-bouncy.effect-rainbow{animation:bounce .9s ease-in-out infinite,rainbow 2s linear infinite}
+.gradient{background-clip:text;-webkit-background-clip:text;color:transparent}
+small{color:var(--muted)}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.preview{min-height:400px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>Text Effects Generator</h1>
+<p class="subtitle">Genera colores RGB especiales y bloques <b>TEXT_EFFECT</b> para tu configuración.</p>
+</header>
+
+<div class="layout">
+<section class="panel">
+<h2>Configuración</h2>
+
+<div class="field">
+<label>Efecto</label>
+<select id="effect">
+<optgroup label="Efectos básicos">
+<option value="shake">Shake</option>
+<option value="wavy">Wavy</option>
+<option value="rainbow">Rainbow</option>
+<option value="bouncy">Bouncy</option>
+<option value="blinking">Blinking</option>
+<option value="pulse">Pulse</option>
+</optgroup>
+<optgroup label="Movimiento">
+<option value="spin">Spin</option>
+<option value="sequential_spin">Sequential Spin</option>
+<option value="fade">Fade</option>
+<option value="iterating">Iterating Jump</option>
+</optgroup>
+<optgroup label="Especiales">
+<option value="glitch">Glitch</option>
+<option value="lava">Lava</option>
+</optgroup>
+<optgroup label="Combinaciones">
+<option value="wavy_rainbow">Wavy + Rainbow</option>
+<option value="bouncy_rainbow">Bouncy + Rainbow</option>
+</optgroup>
+<optgroup label="Transformaciones">
+<option value="scale">Scale x1.5</option>
+<option value="offset">Offset Up</option>
+</optgroup>
+<optgroup label="Gradientes">
+<option value="gradient">Gradient</option>
+<option value="dynamic_gradient">Dynamic Gradient</option>
+</optgroup>
+</select>
+</div>
+
+<div class="field">
+<label>Color identificador</label>
+<div class="color-row">
+<input id="color" type="color" value="#27F580">
+<input id="hex" class="hex" type="text" value="#27F580" maxlength="7">
+</div>
+<div class="rgb">
+<input id="r" type="number" min="0" max="255" value="39">
+<input id="g" type="number" min="0" max="255" value="245">
+<input id="b" type="number" min="0" max="255" value="128">
+</div>
+<small>Este es el RGB que identifica el efecto en el archivo.</small>
+</div>
+
+<div class="field" id="effectColorField">
+<label>Color visual del texto</label>
+<div class="color-row">
+<input id="effectColor" type="color" value="#FF5050">
+<input id="effectHex" class="hex" type="text" value="#FF5050" maxlength="7">
+</div>
+</div>
+
+<div class="field" id="gradientFields" style="display:none">
+<label>Colores del gradiente</label>
+<div class="color-row">
+<input id="grad1" type="color" value="#00C800">
+<input id="grad2" type="color" value="#FFFF00">
+</div>
+<div class="rgb" style="grid-template-columns:1fr 1fr">
+<input id="gradHex1" value="#00C800" maxlength="7">
+<input id="gradHex2" value="#FFFF00" maxlength="7">
+</div>
+</div>
+
+<div class="field">
+<label>Parámetro / velocidad</label>
+<div class="range-line">
+<input id="param" type="range" min="0.2" max="10" step="0.1" value="2">
+<span id="paramValue" class="value">2.0</span>
+</div>
+</div>
+
+<div class="field">
+<label>Duración visual</label>
+<div class="range-line">
+<input id="duration" type="range" min="0.2" max="5" step="0.1" value="1">
+<span id="durationValue" class="value">1.0s</span>
+</div>
+</div>
+
+<div class="field">
+<label class="check"><input id="shadow" type="checkbox" checked> Usar TEXT_EFFECT_WITH_SHADOW</label>
+</div>
+
+<div class="actions">
+<button id="random">Color aleatorio</button>
+<button id="copy" class="secondary">Copiar código</button>
+<button id="reset" class="secondary">Restablecer</button>
+</div>
+
+</section>
+
+<section class="panel preview">
+<h2>Previsualización</h2>
+<div class="preview-stage">
+<span class="preview-label">LIVE PREVIEW</span>
+<div id="preview" class="preview-text">TU TEXTO</div>
+</div>
+<div class="code">
+<pre id="output"></pre>
+</div>
+<div class="code-actions"><button id="copy2">Copiar configuración</button></div>
+</section>
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+function rgbFromHex(hex){
+ hex=hex.trim().replace("#","");
+ if(!/^[0-9a-fA-F]{6}$/.test(hex)) return null;
+ return [parseInt(hex.slice(0,2),16),parseInt(hex.slice(2,4),16),parseInt(hex.slice(4,6),16)];
+}
+function hexFromRgb(r,g,b){return "#"+[r,g,b].map(x=>clamp(Number(x)||0,0,255).toString(16).padStart(2,"0")).join("").toUpperCase()}
+function setMainHex(hex){
+ const rgb=rgbFromHex(hex); if(!rgb)return;
+ $("hex").value=hex.toUpperCase();
+ ["r","g","b"].forEach((id,i)=>$(id).value=rgb[i]);
+ $("color").value=hex;
+}
+function setVisualHex(hex){
+ const rgb=rgbFromHex(hex); if(!rgb)return;
+ $("effectHex").value=hex.toUpperCase(); $("effectColor").value=hex;
+}
+function cssGradient(){
+ return `linear-gradient(90deg, ${$("grad1").value}, ${$("grad2").value})`;
+}
+function update(){
+ const effect=$("effect").value;
+ const visual=$("effectColor").value;
+ const p=Number($("param").value);
+ $("paramValue").textContent=p.toFixed(1);
+ $("durationValue").textContent=Number($("duration").value).toFixed(1)+"s";
+
+ const preview=$("preview");
+ preview.className="preview-text";
+ preview.style="";
+ preview.textContent="TU TEXTO";
+
+ if(effect==="wavy_rainbow"||effect==="bouncy_rainbow"){
+   preview.classList.add(effect==="wavy_rainbow"?"effect-wavy":"effect-bouncy","effect-rainbow");
+ }else if(effect==="gradient"||effect==="dynamic_gradient"){
+   preview.classList.add("gradient");
+   preview.style.backgroundImage=cssGradient();
+   preview.style.backgroundSize=effect==="dynamic_gradient"?"200% 100%":"100% 100%";
+   if(effect==="dynamic_gradient"){
+      preview.animate([{backgroundPosition:"0% 50%"},{backgroundPosition:"100% 50%"},{backgroundPosition:"0% 50%"}],
+      {duration:Math.max(500,p*1000),iterations:Infinity});
+   }
+ }else if(effect==="scale"){
+   preview.style.transform=`scale(1.5)`;
+ }else if(effect==="offset"){
+   preview.style.transform="translateY(-40px)";
+ }else{
+   preview.classList.add("effect-"+effect);
+ }
+ preview.style.color=visual;
+ preview.style.animationDuration=Number($("duration").value)+"s";
+ if(effect==="rainbow"||effect==="wavy_rainbow"||effect==="bouncy_rainbow") preview.style.color=visual;
+
+ const rgb=[$("r").value,$("g").value,$("b").value];
+ const id=`${rgb[0]}, ${rgb[1]}, ${rgb[2]}`;
+ let body="";
+ const shadow=$("shadow").checked;
+ const macro=shadow?"TEXT_EFFECT_WITH_SHADOW":"TEXT_EFFECT";
+
+ if(effect==="shake") body=`    apply_shake();\n    apply_color(rgb(${visualRgb()}));`;
+ else if(effect==="wavy") body=`    apply_wavy();\n    apply_color(rgb(${visualRgb()}));`;
+ else if(effect==="rainbow") body=`    apply_rainbow();`;
+ else if(effect==="bouncy") body=`    apply_bouncy();\n    apply_color(rgb(${visualRgb()}));`;
+ else if(effect==="blinking") body=`    apply_blinking();\n    apply_color(rgb(${visualRgb()}));`;
+ else if(effect==="pulse") body=`    apply_pulse();\n    apply_color(rgb(${visualRgb()}));`;
+ else if(effect==="spin") body=`    apply_spin();\n    apply_color(rgb(${visualRgb()}));`;
+ else if(effect==="sequential_spin") body=`    apply_sequential_spin();\n    apply_color(rgb(${visualRgb()}));`;
+ else if(effect==="fade") body=`    apply_fade();\n    apply_color(rgb(${visualRgb()}));`;
+ else if(effect==="iterating") body=`    apply_iterating();\n    apply_color(rgb(${visualRgb()}));`;
+ else if(effect==="glitch") body=`    apply_glitch();\n    apply_color(rgb(${visualRgb()}));`;
+ else if(effect==="lava") body=`    apply_lava();`;
+ else if(effect==="wavy_rainbow") body=`    apply_wavy();\n    apply_rainbow();`;
+ else if(effect==="bouncy_rainbow") body=`    apply_bouncy();\n    apply_rainbow();`;
+ else if(effect==="scale") body=`    apply_scale(1.5);\n    apply_color(rgb(${visualRgb()}));`;
+ else if(effect==="offset") body=`    apply_offset(0.0, 40.0);\n    apply_color(rgb(${visualRgb()}));`;
+ else if(effect==="gradient") body=`    apply_gradient(rgb(${gradRgb(1)}), rgb(${gradRgb(2)}), ${p.toFixed(1)});`;
+ else if(effect==="dynamic_gradient") body=`    apply_dynamic_gradient(rgb(${gradRgb(1)}), rgb(${gradRgb(2)}), ${p.toFixed(1)}, 500.0);`;
+
+ const label=effect==="wavy_rainbow"?"Wavy + Rainbow":effect==="bouncy_rainbow"?"Bouncy + Rainbow":effect.replaceAll("_"," ");
+ $("output").textContent=`// ${label} (${ $("hex").value.toUpperCase() })\n${macro}(${id}) {\n${body}\n}`;
+}
+function visualRgb(){return rgbFromHex($("effectColor").value).join(", ")}
+function gradRgb(n){return rgbFromHex($("grad"+n).value).join(", ")}
+function syncGradientHex(n){
+ const h=$("gradHex"+n).value.trim(); const rgb=rgbFromHex(h); if(rgb)$("grad"+n).value=h;
+ update();
+}
+$("color").addEventListener("input",e=>{setMainHex(e.target.value);update()});
+$("hex").addEventListener("input",e=>{const r=rgbFromHex(e.target.value);if(r){$("color").value=e.target.value;["r","g","b"].forEach((x,i)=>$(x).value=r[i]);update()}});
+["r","g","b"].forEach((id,i)=>$(id).addEventListener("input",()=>{const h=hexFromRgb($("r").value,$("g").value,$("b").value);$("hex").value=h;$("color").value=h;update()}));
+$("effectColor").addEventListener("input",e=>{setVisualHex(e.target.value);update()});
+$("effectHex").addEventListener("input",e=>{const r=rgbFromHex(e.target.value);if(r){$("effectColor").value=e.target.value;update()}});
+["grad1","grad2"].forEach((id,i)=>$(id).addEventListener("input",()=>{$("gradHex"+(i+1)).value=$("grad"+(i+1)).value.toUpperCase();update()}));
+["gradHex1","gradHex2"].forEach((id,i)=>$(id).addEventListener("input",()=>syncGradientHex(i+1)));
+["effect","param","duration","shadow"].forEach(id=>$(id).addEventListener("input",update));
+$("random").onclick=()=>{const h=hexFromRgb(Math.random()*256,Math.random()*256,Math.random()*256);setMainHex(h);update()};
+function copy(){navigator.clipboard.writeText($("output").textContent);$("copy").textContent="¡Copiado!";$("copy2").textContent="¡Copiado!";setTimeout(()=>{$("copy").textContent="Copiar código";$("copy2").textContent="Copiar configuración"},1200)}
+$("copy").onclick=copy;$("copy2").onclick=copy;
+$("reset").onclick=()=>{location.reload()};
+$("effect").addEventListener("change",()=>{
+ $("gradientFields").style.display=["gradient","dynamic_gradient"].includes($("effect").value)?"block":"none";
+ update();
+});
+update();
+</script>
+</body>
+</html>
